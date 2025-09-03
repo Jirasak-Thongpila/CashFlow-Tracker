@@ -11,4 +11,5 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('register/', views.register, name='register'),
     path('', views.dashboard, name='dashboard'),
+    path('api/cashflow-data/', views.get_cashflow_data, name='get_cashflow_data'),
 ]
