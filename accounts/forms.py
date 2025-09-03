@@ -1,12 +1,14 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
+
 from .models import CustomUser
 
+
 class CustomLoginForm(AuthenticationForm):
-    username = forms.EmailField(
-        widget=forms.EmailInput(attrs={
+    username = forms.CharField(
+        widget=forms.TextInput(attrs={
             'class': 'form-control',
-            'placeholder': 'Email',
+            'placeholder': 'Username',
             'autofocus': True
         })
     )
@@ -16,10 +18,7 @@ class CustomLoginForm(AuthenticationForm):
             'placeholder': 'Password'
         })
     )
-    
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['username'].label = 'Email'
+
 
 class CustomUserCreationForm(UserCreationForm):
     email = forms.EmailField(
@@ -47,11 +46,11 @@ class CustomUserCreationForm(UserCreationForm):
             'placeholder': 'Confirm Password'
         })
     )
-    
+
     class Meta:
         model = CustomUser
         fields = ('username', 'email', 'password1', 'password2')
-    
+
     def save(self, commit=True):
         user = super().save(commit=False)
         user.email = self.cleaned_data['email']
