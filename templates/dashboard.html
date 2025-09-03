@@ -19,9 +19,9 @@
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
                         <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                            Total Income
+                            รายรับทั้งหมด
                         </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">$0.00</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_income|floatformat:2|default:0 }} ฿</div>
                     </div>
                     <div class="col-auto">
                         <i class="fas fa-arrow-up fa-2x text-success"></i>
@@ -37,9 +37,9 @@
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
                         <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
-                            Total Expenses
+                            รายจ่ายทั้งหมด
                         </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">$0.00</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_expenses|floatformat:2|default:0 }} ฿</div>
                     </div>
                     <div class="col-auto">
                         <i class="fas fa-arrow-down fa-2x text-danger"></i>
@@ -55,9 +55,9 @@
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
                         <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                            Net Balance
+                            ยอดคงเหลือสุทธิ
                         </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">$0.00</div>
+                        <div class="h5 mb-0 font-weight-bold {% if net_balance >= 0 %}text-success{% else %}text-danger{% endif %}">{{ net_balance|floatformat:2|default:0 }} ฿</div>
                     </div>
                     <div class="col-auto">
                         <i class="fas fa-wallet fa-2x text-info"></i>
@@ -73,9 +73,9 @@
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
                         <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                            This Month
+                            เดือนนี้
                         </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">$0.00</div>
+                        <div class="h5 mb-0 font-weight-bold {% if current_month_balance >= 0 %}text-success{% else %}text-danger{% endif %}">{{ current_month_balance|floatformat:2|default:0 }} ฿</div>
                     </div>
                     <div class="col-auto">
                         <i class="fas fa-calendar fa-2x text-warning"></i>
@@ -120,29 +120,59 @@
     <div class="col-12">
         <div class="card shadow mb-4">
             <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                <h6 class="m-0 font-weight-bold text-primary">Recent Transactions</h6>
-                <a href="#" class="btn btn-primary btn-sm">
-                    <i class="fas fa-plus me-1"></i>Add Transaction
-                </a>
+                <h6 class="m-0 font-weight-bold text-primary">รายการธุรกรรมล่าสุด</h6>
+                <div>
+                    <a href="{% url 'transaction_create' %}" class="btn btn-primary btn-sm me-2">
+                        <i class="fas fa-plus me-1"></i>เพิ่มรายการ
+                    </a>
+                    <a href="{% url 'transaction_list' %}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-list me-1"></i>ดูทั้งหมด
+                    </a>
+                </div>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-bordered" width="100%" cellspacing="0">
                         <thead>
                             <tr>
-                                <th>Date</th>
-                                <th>Description</th>
-                                <th>Category</th>
-                                <th>Type</th>
-                                <th>Amount</th>
+                                <th>วันที่</th>
+                                <th>รายละเอียด</th>
+                                <th>หมวดหมู่</th>
+                                <th>ประเภท</th>
+                                <th>จำนวนเงิน</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td colspan="5" class="text-center text-muted">
-                                    No transactions yet. <a href="#">Add your first transaction</a>
-                                </td>
-                            </tr>
+                            {% if recent_transactions %}
+                                {% for transaction in recent_transactions %}
+                                    <tr>
+                                        <td>{{ transaction.date|date:"d M Y" }}</td>
+                                        <td>{{ transaction.description }}</td>
+                                        <td>
+                                            <span style="color: {{ transaction.category.color }};">
+                                                {{ transaction.category.icon }}
+                                            </span>
+                                            {{ transaction.category.name }}
+                                        </td>
+                                        <td>
+                                            <span class="badge {% if transaction.transaction_type == 'income' %}bg-success{% else %}bg-danger{% endif %}">
+                                                {{ transaction.get_transaction_type_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="{% if transaction.transaction_type == 'income' %}text-success{% else %}text-danger{% endif %} font-weight-bold">
+                                                {% if transaction.transaction_type == 'income' %}+{% else %}-{% endif %}{{ transaction.amount|floatformat:2 }} ฿
+                                            </span>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">
+                                        ยังไม่มีรายการธุรกรรม <a href="{% url 'transaction_create' %}">เพิ่มรายการแรก</a>
+                                    </td>
+                                </tr>
+                            {% endif %}
                         </tbody>
                     </table>
                 </div>
@@ -156,28 +186,28 @@
     <div class="col-12">
         <div class="card shadow mb-4">
             <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Quick Actions</h6>
+                <h6 class="m-0 font-weight-bold text-primary">การดำเนินการด่วน</h6>
             </div>
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-3 mb-3">
-                        <a href="#" class="btn btn-success btn-block">
-                            <i class="fas fa-plus-circle me-2"></i>Add Income
+                        <a href="{% url 'transaction_create' %}" class="btn btn-success btn-block">
+                            <i class="fas fa-plus-circle me-2"></i>เพิ่มรายรับ
                         </a>
                     </div>
                     <div class="col-md-3 mb-3">
-                        <a href="#" class="btn btn-danger btn-block">
-                            <i class="fas fa-minus-circle me-2"></i>Add Expense
+                        <a href="{% url 'transaction_create' %}" class="btn btn-danger btn-block">
+                            <i class="fas fa-minus-circle me-2"></i>เพิ่มรายจ่าย
                         </a>
                     </div>
                     <div class="col-md-3 mb-3">
-                        <a href="#" class="btn btn-info btn-block">
-                            <i class="fas fa-chart-bar me-2"></i>View Reports
+                        <a href="{% url 'transaction_list' %}" class="btn btn-info btn-block">
+                            <i class="fas fa-chart-bar me-2"></i>ดูรายงาน
                         </a>
                     </div>
                     <div class="col-md-3 mb-3">
-                        <a href="#" class="btn btn-secondary btn-block">
-                            <i class="fas fa-cog me-2"></i>Settings
+                        <a href="{% url 'category_list' %}" class="btn btn-secondary btn-block">
+                            <i class="fas fa-tags me-2"></i>จัดการหมวดหมู่
                         </a>
                     </div>
                 </div>
@@ -217,51 +247,90 @@
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-// Placeholder charts - will be populated with real data later
+// Charts with real data
 document.addEventListener('DOMContentLoaded', function() {
-    // Area Chart
+    // Area Chart - Monthly Income vs Expenses
     const areaCtx = document.getElementById('myAreaChart');
     if (areaCtx) {
         new Chart(areaCtx, {
             type: 'line',
             data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                labels: {{ monthly_data.labels|safe }},
                 datasets: [{
-                    label: 'Income',
-                    data: [0, 0, 0, 0, 0, 0],
+                    label: 'รายรับ',
+                    data: {{ monthly_data.income_data|safe }},
                     borderColor: '#1cc88a',
                     backgroundColor: 'rgba(28, 200, 138, 0.1)',
-                    fill: true
+                    fill: true,
+                    tension: 0.3
                 }, {
-                    label: 'Expenses',
-                    data: [0, 0, 0, 0, 0, 0],
+                    label: 'รายจ่าย',
+                    data: {{ monthly_data.expense_data|safe }},
                     borderColor: '#e74a3b',
                     backgroundColor: 'rgba(231, 74, 59, 0.1)',
-                    fill: true
+                    fill: true,
+                    tension: 0.3
                 }]
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return value.toLocaleString() + ' ฿';
+                            }
+                        }
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                }
             }
         });
     }
 
-    // Pie Chart
+    // Pie Chart - Expense Categories
     const pieCtx = document.getElementById('myPieChart');
     if (pieCtx) {
         new Chart(pieCtx, {
             type: 'pie',
             data: {
-                labels: ['No data yet'],
+                labels: {{ expense_categories.labels|safe }},
                 datasets: [{
-                    data: [1],
-                    backgroundColor: ['#e3e6f0']
+                    data: {{ expense_categories.data|safe }},
+                    backgroundColor: {{ expense_categories.colors|safe }}
                 }]
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return label + ': ' + value.toLocaleString() + ' ฿ (' + percentage + '%)';
+                            }
+                        }
+                    }
+                }
             }
         });
     }

@@ -1,0 +1,287 @@
+{% extends 'base.html' %}
+
+{% block title %}รายการธุรกรรม - CashFlow Tracker{% endblock %}
+
+{% block extra_css %}
+<style>
+    .transaction-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border-left: 4px solid #dee2e6;
+    }
+
+    .transaction-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .transaction-card.income {
+        border-left-color: #28a745;
+    }
+
+    .transaction-card.expense {
+        border-left-color: #dc3545;
+    }
+
+    .amount-income {
+        color: #28a745;
+        font-weight: bold;
+    }
+
+    .amount-expense {
+        color: #dc3545;
+        font-weight: bold;
+    }
+
+    .stats-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+    }
+
+    .category-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.375rem 0.75rem;
+        border-radius: 0.5rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .filter-section {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+
+    .date-range-fields {
+        display: none;
+    }
+
+    .date-range-fields.show {
+        display: block;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h1 class="h2"><i class="fas fa-exchange-alt me-2"></i>รายการธุรกรรม</h1>
+            <p class="text-muted">จัดการรายการรายรับและรายจ่ายของคุณ</p>
+        </div>
+        <div class="col-md-6 text-end">
+            <a href="{% url 'transaction_create' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>เพิ่มรายการใหม่
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card stats-card">
+                <div class="card-body text-center">
+                    <i class="fas fa-arrow-up fa-2x mb-2"></i>
+                    <h4>{{ stats.total_income|floatformat:2|default:0 }} ฿</h4>
+                    <p class="mb-0">รายรับทั้งหมด</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card">
+                <div class="card-body text-center">
+                    <i class="fas fa-arrow-down fa-2x mb-2"></i>
+                    <h4>{{ stats.total_expense|floatformat:2|default:0 }} ฿</h4>
+                    <p class="mb-0">รายจ่ายทั้งหมด</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card">
+                <div class="card-body text-center">
+                    <i class="fas fa-wallet fa-2x mb-2"></i>
+                    <h4 class="{% if stats.net_balance >= 0 %}text-success{% else %}text-danger{% endif %}">
+                        {{ stats.net_balance|floatformat:2|default:0 }} ฿
+                    </h4>
+                    <p class="mb-0">ยอดสุทธิ</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card stats-card">
+                <div class="card-body text-center">
+                    <i class="fas fa-list fa-2x mb-2"></i>
+                    <h4>{{ stats.transaction_count }}</h4>
+                    <p class="mb-0">รายการทั้งหมด</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <form method="get" class="row g-3">
+            <div class="col-md-2">
+                <label class="form-label">ประเภท</label>
+                {{ filter_form.transaction_type }}
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">หมวดหมู่</label>
+                {{ filter_form.category }}
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">ช่วงเวลา</label>
+                {{ filter_form.period }}
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">ค้นหา</label>
+                {{ filter_form.search }}
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">&nbsp;</label>
+                <button type="submit" class="btn btn-outline-primary w-100">
+                    <i class="fas fa-search me-1"></i>ค้นหา
+                </button>
+            </div>
+            
+            <!-- Custom Date Range -->
+            <div class="col-12 date-range-fields" id="dateRangeFields">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">จากวันที่</label>
+                        {{ filter_form.date_from }}
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">ถึงวันที่</label>
+                        {{ filter_form.date_to }}
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Transaction List -->
+    {% if transactions %}
+        <div class="row">
+            {% for transaction in transactions %}
+                <div class="col-12 mb-3">
+                    <div class="card transaction-card {{ transaction.transaction_type }}">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-1 text-center">
+                                    <span class="category-badge" style="background-color: {{ transaction.category.color }}; color: white;">
+                                        {{ transaction.category.icon }}
+                                    </span>
+                                </div>
+                                <div class="col-md-3">
+                                    <h6 class="mb-1">{{ transaction.description }}</h6>
+                                    <small class="text-muted">{{ transaction.category.name }}</small>
+                                </div>
+                                <div class="col-md-2">
+                                    <span class="badge {% if transaction.transaction_type == 'income' %}bg-success{% else %}bg-danger{% endif %}">
+                                        {{ transaction.get_transaction_type_display }}
+                                    </span>
+                                </div>
+                                <div class="col-md-2">
+                                    <small class="text-muted">{{ transaction.date|date:"d M Y" }}</small>
+                                </div>
+                                <div class="col-md-2">
+                                    <span class="amount-{{ transaction.transaction_type }}">
+                                        {% if transaction.transaction_type == 'income' %}+{% else %}-{% endif %}{{ transaction.amount|floatformat:2 }} ฿
+                                    </span>
+                                </div>
+                                <div class="col-md-2 text-end">
+                                    <div class="btn-group" role="group">
+                                        <a href="{% url 'transaction_edit' transaction.pk %}" class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a href="{% url 'transaction_delete' transaction.pk %}" class="btn btn-outline-danger btn-sm">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% if transaction.notes %}
+                                <div class="row mt-2">
+                                    <div class="col-md-11 offset-md-1">
+                                        <small class="text-muted"><i class="fas fa-sticky-note me-1"></i>{{ transaction.notes }}</small>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if transactions.has_other_pages %}
+            <nav aria-label="Transaction pagination" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if transactions.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{{ request.GET.urlencode }}&page={{ transactions.previous_page_number }}">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    {% for num in transactions.paginator.page_range %}
+                        {% if transactions.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > transactions.number|add:-3 and num < transactions.number|add:3 %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{{ request.GET.urlencode }}&page={{ num }}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if transactions.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{{ request.GET.urlencode }}&page={{ transactions.next_page_number }}">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-receipt fa-4x text-muted mb-3"></i>
+            <h4 class="text-muted">ไม่มีรายการธุรกรรม</h4>
+            <p class="text-muted mb-4">คุณยังไม่มีรายการธุรกรรมใดๆ เริ่มต้นเพิ่มรายการแรกของคุณ</p>
+            <a href="{% url 'transaction_create' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>เพิ่มรายการใหม่
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const periodSelect = document.getElementById('id_period');
+    const dateRangeFields = document.getElementById('dateRangeFields');
+    
+    function toggleDateRange() {
+        if (periodSelect.value === 'custom') {
+            dateRangeFields.classList.add('show');
+        } else {
+            dateRangeFields.classList.remove('show');
+        }
+    }
+    
+    if (periodSelect) {
+        periodSelect.addEventListener('change', toggleDateRange);
+        toggleDateRange(); // Initialize on page load
+    }
+});
+</script>
+{% endblock %}

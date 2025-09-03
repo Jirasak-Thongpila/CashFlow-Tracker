@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+
+{% block title %}ลบรายการธุรกรรม - CashFlow Tracker{% endblock %}
+
+{% block extra_css %}
+<style>
+    .delete-container {
+        max-width: 500px;
+        margin: 50px auto;
+    }
+    
+    .transaction-preview {
+        display: inline-block;
+        padding: 15px 25px;
+        border-radius: 15px;
+        color: white;
+        font-weight: bold;
+        margin: 10px 0;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        min-width: 200px;
+    }
+    
+    .category-icon {
+        font-size: 1.5rem;
+        margin-right: 10px;
+    }
+    
+    .amount-display {
+        font-size: 1.2rem;
+        margin-left: 10px;
+    }
+    
+    .warning-box {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px 0;
+    }
+    
+    .danger-zone {
+        background: #f8d7da;
+        border: 1px solid #f5c6cb;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px 0;
+    }
+
+    .transaction-details {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px 0;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="delete-container">
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    ยืนยันการลบรายการธุรกรรม
+                </h4>
+            </div>
+            
+            <div class="card-body text-center">
+                <p class="lead">คุณแน่ใจหรือไม่ที่จะลบรายการนี้?</p>
+                
+                <!-- Transaction Preview -->
+                <div class="transaction-preview" style="background-color: {{ transaction.category.color }};">
+                    <span class="category-icon">{{ transaction.category.icon }}</span>
+                    <span>{{ transaction.description }}</span>
+                    <span class="amount-display">
+                        {% if transaction.transaction_type == 'income' %}+{% else %}-{% endif %}{{ transaction.amount|floatformat:2 }} ฿
+                    </span>
+                </div>
+                
+                <div class="mt-2">
+                    <span class="badge {% if transaction.transaction_type == 'income' %}bg-success{% else %}bg-danger{% endif %}">
+                        {{ transaction.get_transaction_type_display }}
+                    </span>
+                </div>
+
+                <!-- Transaction Details -->
+                <div class="transaction-details text-start">
+                    <div class="row">
+                        <div class="col-4"><strong>หมวดหมู่:</strong></div>
+                        <div class="col-8">{{ transaction.category_display }}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4"><strong>วันที่:</strong></div>
+                        <div class="col-8">{{ transaction.date|date:"d M Y" }}</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4"><strong>จำนวนเงิน:</strong></div>
+                        <div class="col-8">{{ transaction.amount|floatformat:2 }} บาท</div>
+                    </div>
+                    {% if transaction.notes %}
+                        <div class="row">
+                            <div class="col-4"><strong>หมายเหตุ:</strong></div>
+                            <div class="col-8">{{ transaction.notes }}</div>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Warning -->
+                <div class="warning-box">
+                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                    <strong>คำเตือน:</strong> การลบรายการนี้จะไม่สามารถย้อนกลับได้
+                </div>
+
+                <!-- Additional warnings -->
+                <div class="danger-zone">
+                    <i class="fas fa-info-circle text-danger me-2"></i>
+                    <strong>หมายเหตุ:</strong> การลบรายการนี้จะส่งผลต่อสถิติและยอดรวมในระบบของคุณ
+                </div>
+            </div>
+
+            <div class="card-footer">
+                <form method="post" class="d-flex justify-content-between">
+                    {% csrf_token %}
+                    <a href="{% url 'transaction_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>ยกเลิก
+                    </a>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-2"></i>ลบรายการ
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="text-center mt-4">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb justify-content-center">
+                    <li class="breadcrumb-item">
+                        <a href="{% url 'transaction_list' %}">รายการธุรกรรม</a>
+                    </li>
+                    <li class="breadcrumb-item active">
+                        ลบ {{ transaction.description|truncatechars:30 }}
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+</div>
+{% endblock %}

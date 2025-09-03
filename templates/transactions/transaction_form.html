@@ -1,0 +1,321 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - CashFlow Tracker{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-container {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    .preview-section {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .transaction-preview {
+        display: inline-block;
+        padding: 15px 25px;
+        border-radius: 15px;
+        color: white;
+        font-weight: bold;
+        margin: 10px;
+        min-width: 200px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .category-icon {
+        font-size: 1.5rem;
+        margin-right: 10px;
+    }
+    
+    .amount-display {
+        font-size: 1.2rem;
+        margin-left: 10px;
+    }
+    
+    .form-section {
+        margin-bottom: 2rem;
+    }
+    
+    .form-section-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: #495057;
+        border-bottom: 2px solid #e9ecef;
+        padding-bottom: 0.5rem;
+    }
+    
+    .required-field {
+        position: relative;
+    }
+    
+    .required-field label::after {
+        content: " *";
+        color: #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="form-container">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col">
+                <h1 class="h2"><i class="fas fa-plus-circle me-2"></i>{{ title }}</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'transaction_list' %}">รายการธุรกรรม</a></li>
+                        <li class="breadcrumb-item active">{{ title }}</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Preview Section -->
+        <div class="preview-section">
+            <h5 class="mb-3">ตัวอย่างรายการ</h5>
+            <div class="transaction-preview" id="transactionPreview" style="background-color: #6c757d;">
+                <span class="category-icon" id="iconPreview">💰</span>
+                <span id="descriptionPreview">รายละเอียดธุรกรรม</span>
+                <span class="amount-display" id="amountPreview">0.00 ฿</span>
+            </div>
+            <div class="mt-2">
+                <span class="badge bg-secondary" id="typePreview">เลือกประเภท</span>
+            </div>
+        </div>
+
+        <!-- Form -->
+        <form method="post" class="card">
+            {% csrf_token %}
+            <div class="card-body">
+                <!-- Transaction Type -->
+                <div class="form-section required-field">
+                    <div class="form-section-title">ประเภทธุรกรรม</div>
+                    <label class="form-label">{{ form.transaction_type.label }}</label>
+                    {{ form.transaction_type }}
+                    {% if form.transaction_type.errors %}
+                        <div class="text-danger mt-1">
+                            {% for error in form.transaction_type.errors %}
+                                <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Category -->
+                <div class="form-section required-field">
+                    <div class="form-section-title">หมวดหมู่</div>
+                    <label class="form-label">{{ form.category.label }}</label>
+                    {{ form.category }}
+                    {% if form.category.errors %}
+                        <div class="text-danger mt-1">
+                            {% for error in form.category.errors %}
+                                <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <div class="form-text">หมวดหมู่จะแสดงตามประเภทที่เลือกข้างต้น</div>
+                </div>
+
+                <!-- Transaction Details -->
+                <div class="form-section">
+                    <div class="form-section-title">รายละเอียดธุรกรรม</div>
+                    
+                    <!-- Description -->
+                    <div class="mb-3 required-field">
+                        <label class="form-label">{{ form.description.label }}</label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="text-danger mt-1">
+                                {% for error in form.description.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Amount -->
+                    <div class="mb-3 required-field">
+                        <label class="form-label">{{ form.amount.label }}</label>
+                        <div class="input-group">
+                            {{ form.amount }}
+                            <span class="input-group-text">บาท</span>
+                        </div>
+                        {% if form.amount.errors %}
+                            <div class="text-danger mt-1">
+                                {% for error in form.amount.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Date -->
+                    <div class="mb-3 required-field">
+                        <label class="form-label">{{ form.date.label }}</label>
+                        {{ form.date }}
+                        {% if form.date.errors %}
+                            <div class="text-danger mt-1">
+                                {% for error in form.date.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="mb-3">
+                        <label class="form-label">{{ form.notes.label }}</label>
+                        {{ form.notes }}
+                        {% if form.notes.errors %}
+                            <div class="text-danger mt-1">
+                                {% for error in form.notes.errors %}
+                                    <small>{{ error }}</small>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Form Errors -->
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                            <div>{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="card-footer">
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'transaction_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>ยกเลิก
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>บันทึก
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const typeField = document.getElementById('id_transaction_type');
+    const categoryField = document.getElementById('id_category');
+    const descriptionField = document.getElementById('id_description');
+    const amountField = document.getElementById('id_amount');
+    const dateField = document.getElementById('id_date');
+    
+    const typePreview = document.getElementById('typePreview');
+    const iconPreview = document.getElementById('iconPreview');
+    const descriptionPreview = document.getElementById('descriptionPreview');
+    const amountPreview = document.getElementById('amountPreview');
+    const transactionPreview = document.getElementById('transactionPreview');
+
+    // Set today's date as default if no date is set
+    if (!dateField.value) {
+        const today = new Date();
+        const formattedDate = today.getFullYear() + '-' + 
+                             String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+                             String(today.getDate()).padStart(2, '0');
+        dateField.value = formattedDate;
+    }
+
+    // Function to load categories based on transaction type
+    function loadCategories(transactionType) {
+        if (!transactionType) {
+            categoryField.innerHTML = '<option value="">เลือกหมวดหมู่</option>';
+            return;
+        }
+
+        fetch(`{% url 'get_categories_by_type' %}?type=${transactionType}`)
+            .then(response => response.json())
+            .then(data => {
+                categoryField.innerHTML = '<option value="">เลือกหมวดหมู่</option>';
+                data.categories.forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category.id;
+                    option.textContent = category.display_name;
+                    option.dataset.icon = category.icon;
+                    option.dataset.color = category.color;
+                    categoryField.appendChild(option);
+                });
+                
+                // If editing, select the current category
+                {% if transaction %}
+                    categoryField.value = '{{ transaction.category.id }}';
+                {% endif %}
+                
+                updatePreview();
+            })
+            .catch(error => {
+                console.error('Error loading categories:', error);
+            });
+    }
+
+    // Function to update preview
+    function updatePreview() {
+        const type = typeField.value;
+        const categoryOption = categoryField.options[categoryField.selectedIndex];
+        const description = descriptionField.value || 'รายละเอียดธุรกรรม';
+        const amount = amountField.value || '0.00';
+
+        // Update description
+        descriptionPreview.textContent = description;
+
+        // Update amount
+        const sign = type === 'income' ? '+' : type === 'expense' ? '-' : '';
+        amountPreview.textContent = `${sign}${amount} ฿`;
+
+        // Update type badge
+        if (type === 'income') {
+            typePreview.textContent = 'รายรับ';
+            typePreview.className = 'badge bg-success';
+        } else if (type === 'expense') {
+            typePreview.textContent = 'รายจ่าย';
+            typePreview.className = 'badge bg-danger';
+        } else {
+            typePreview.textContent = 'เลือกประเภท';
+            typePreview.className = 'badge bg-secondary';
+        }
+
+        // Update category icon and color
+        if (categoryOption && categoryOption.dataset.icon) {
+            iconPreview.textContent = categoryOption.dataset.icon;
+            transactionPreview.style.backgroundColor = categoryOption.dataset.color || '#6c757d';
+        } else {
+            iconPreview.textContent = '💰';
+            transactionPreview.style.backgroundColor = '#6c757d';
+        }
+    }
+
+    // Event listeners
+    typeField.addEventListener('change', function() {
+        loadCategories(this.value);
+        updatePreview();
+    });
+
+    categoryField.addEventListener('change', updatePreview);
+    descriptionField.addEventListener('input', updatePreview);
+    amountField.addEventListener('input', updatePreview);
+
+    // Initialize
+    if (typeField.value) {
+        loadCategories(typeField.value);
+    }
+    updatePreview();
+});
+</script>
+{% endblock %}
