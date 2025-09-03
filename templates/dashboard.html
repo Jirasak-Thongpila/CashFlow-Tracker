@@ -19,9 +19,9 @@
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
                         <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                            Total Income
+                            รายรับทั้งหมด
                         </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">$0.00</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_income|floatformat:2|default:0 }} ฿</div>
                     </div>
                     <div class="col-auto">
                         <i class="fas fa-arrow-up fa-2x text-success"></i>
@@ -37,9 +37,9 @@
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
                         <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
-                            Total Expenses
+                            รายจ่ายทั้งหมด
                         </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">$0.00</div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_expenses|floatformat:2|default:0 }} ฿</div>
                     </div>
                     <div class="col-auto">
                         <i class="fas fa-arrow-down fa-2x text-danger"></i>
@@ -55,9 +55,9 @@
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
                         <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                            Net Balance
+                            ยอดคงเหลือสุทธิ
                         </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">$0.00</div>
+                        <div class="h5 mb-0 font-weight-bold {% if net_balance >= 0 %}text-success{% else %}text-danger{% endif %}">{{ net_balance|floatformat:2|default:0 }} ฿</div>
                     </div>
                     <div class="col-auto">
                         <i class="fas fa-wallet fa-2x text-info"></i>
@@ -73,9 +73,9 @@
                 <div class="row no-gutters align-items-center">
                     <div class="col mr-2">
                         <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                            This Month
+                            เดือนนี้
                         </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">$0.00</div>
+                        <div class="h5 mb-0 font-weight-bold {% if current_month_balance >= 0 %}text-success{% else %}text-danger{% endif %}">{{ current_month_balance|floatformat:2|default:0 }} ฿</div>
                     </div>
                     <div class="col-auto">
                         <i class="fas fa-calendar fa-2x text-warning"></i>
@@ -90,11 +90,64 @@
 <div class="row">
     <div class="col-xl-8 col-lg-7">
         <div class="card shadow mb-4">
-            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                <h6 class="m-0 font-weight-bold text-primary">Cash Flow Overview</h6>
+            <div class="card-header py-3">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h6 class="m-0 font-weight-bold text-primary">Cash Flow Overview</h6>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <select id="periodSelector" class="form-select form-select-sm">
+                                    <option value="year">ปีนี้</option>
+                                    <option value="6months">6 เดือนล่าสุด</option>
+                                    <option value="3months">3 เดือนล่าสุด</option>
+                                    <option value="month">เดือนนี้</option>
+                                    <option value="week">สัปดาห์นี้</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <select id="yearSelector" class="form-select form-select-sm">
+                                    <option value="2024">2024</option>
+                                    <option value="2023">2023</option>
+                                    <option value="2022">2022</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div class="card-body">
-                <div class="chart-area">
+                <!-- Chart Statistics Row -->
+                <div class="row mb-3" id="chartStats">
+                    <div class="col-md-3 text-center">
+                        <small class="text-muted">รายรับ</small>
+                        <div class="h6 text-success mb-0" id="statsIncome">0 ฿</div>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <small class="text-muted">รายจ่าย</small>
+                        <div class="h6 text-danger mb-0" id="statsExpenses">0 ฿</div>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <small class="text-muted">กำไรสุทธิ</small>
+                        <div class="h6 mb-0" id="statsNetFlow">0 ฿</div>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <small class="text-muted">ยอดสุทธิ</small>
+                        <div class="h6 mb-0" id="statsBalance">0 ฿</div>
+                    </div>
+                </div>
+                
+                <!-- Chart Loading Indicator -->
+                <div id="chartLoading" class="text-center py-4" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <div class="mt-2 text-muted">กำลังโหลดข้อมูล...</div>
+                </div>
+                
+                <!-- Chart Container -->
+                <div class="chart-area" id="chartContainer">
                     <canvas id="myAreaChart" width="100%" height="40"></canvas>
                 </div>
             </div>
@@ -120,29 +173,59 @@
     <div class="col-12">
         <div class="card shadow mb-4">
             <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                <h6 class="m-0 font-weight-bold text-primary">Recent Transactions</h6>
-                <a href="#" class="btn btn-primary btn-sm">
-                    <i class="fas fa-plus me-1"></i>Add Transaction
-                </a>
+                <h6 class="m-0 font-weight-bold text-primary">รายการธุรกรรมล่าสุด</h6>
+                <div>
+                    <a href="{% url 'transaction_create' %}" class="btn btn-primary btn-sm me-2">
+                        <i class="fas fa-plus me-1"></i>เพิ่มรายการ
+                    </a>
+                    <a href="{% url 'transaction_list' %}" class="btn btn-outline-primary btn-sm">
+                        <i class="fas fa-list me-1"></i>ดูทั้งหมด
+                    </a>
+                </div>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-bordered" width="100%" cellspacing="0">
                         <thead>
                             <tr>
-                                <th>Date</th>
-                                <th>Description</th>
-                                <th>Category</th>
-                                <th>Type</th>
-                                <th>Amount</th>
+                                <th>วันที่</th>
+                                <th>รายละเอียด</th>
+                                <th>หมวดหมู่</th>
+                                <th>ประเภท</th>
+                                <th>จำนวนเงิน</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td colspan="5" class="text-center text-muted">
-                                    No transactions yet. <a href="#">Add your first transaction</a>
-                                </td>
-                            </tr>
+                            {% if recent_transactions %}
+                                {% for transaction in recent_transactions %}
+                                    <tr>
+                                        <td>{{ transaction.date|date:"d M Y" }}</td>
+                                        <td>{{ transaction.description }}</td>
+                                        <td>
+                                            <span style="color: {{ transaction.category.color }};">
+                                                {{ transaction.category.icon }}
+                                            </span>
+                                            {{ transaction.category.name }}
+                                        </td>
+                                        <td>
+                                            <span class="badge {% if transaction.transaction_type == 'income' %}bg-success{% else %}bg-danger{% endif %}">
+                                                {{ transaction.get_transaction_type_display }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="{% if transaction.transaction_type == 'income' %}text-success{% else %}text-danger{% endif %} font-weight-bold">
+                                                {% if transaction.transaction_type == 'income' %}+{% else %}-{% endif %}{{ transaction.amount|floatformat:2 }} ฿
+                                            </span>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">
+                                        ยังไม่มีรายการธุรกรรม <a href="{% url 'transaction_create' %}">เพิ่มรายการแรก</a>
+                                    </td>
+                                </tr>
+                            {% endif %}
                         </tbody>
                     </table>
                 </div>
@@ -156,28 +239,28 @@
     <div class="col-12">
         <div class="card shadow mb-4">
             <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Quick Actions</h6>
+                <h6 class="m-0 font-weight-bold text-primary">การดำเนินการด่วน</h6>
             </div>
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-3 mb-3">
-                        <a href="#" class="btn btn-success btn-block">
-                            <i class="fas fa-plus-circle me-2"></i>Add Income
+                        <a href="{% url 'transaction_create' %}" class="btn btn-success btn-block">
+                            <i class="fas fa-plus-circle me-2"></i>เพิ่มรายรับ
                         </a>
                     </div>
                     <div class="col-md-3 mb-3">
-                        <a href="#" class="btn btn-danger btn-block">
-                            <i class="fas fa-minus-circle me-2"></i>Add Expense
+                        <a href="{% url 'transaction_create' %}" class="btn btn-danger btn-block">
+                            <i class="fas fa-minus-circle me-2"></i>เพิ่มรายจ่าย
                         </a>
                     </div>
                     <div class="col-md-3 mb-3">
-                        <a href="#" class="btn btn-info btn-block">
-                            <i class="fas fa-chart-bar me-2"></i>View Reports
+                        <a href="{% url 'transaction_list' %}" class="btn btn-info btn-block">
+                            <i class="fas fa-chart-bar me-2"></i>ดูรายงาน
                         </a>
                     </div>
                     <div class="col-md-3 mb-3">
-                        <a href="#" class="btn btn-secondary btn-block">
-                            <i class="fas fa-cog me-2"></i>Settings
+                        <a href="{% url 'category_list' %}" class="btn btn-secondary btn-block">
+                            <i class="fas fa-tags me-2"></i>จัดการหมวดหมู่
                         </a>
                     </div>
                 </div>
@@ -211,57 +294,337 @@
     display: block;
     width: 100%;
 }
+
+/* Enhanced Cash Flow Chart Styles */
+#chartStats {
+    background: rgba(246, 247, 249, 0.8);
+    border-radius: 0.35rem;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+#chartStats .col-md-3 {
+    border-right: 1px solid rgba(0,0,0,0.1);
+}
+
+#chartStats .col-md-3:last-child {
+    border-right: none;
+}
+
+.chart-area {
+    position: relative;
+    height: 400px;
+    transition: opacity 0.3s ease;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .card-header .row.align-items-center {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .card-header .col-md-6:last-child {
+        width: 100%;
+    }
+    
+    #chartStats .col-md-3 {
+        border-right: none;
+        border-bottom: 1px solid rgba(0,0,0,0.1);
+        margin-bottom: 0.5rem;
+    }
+    
+    #chartStats .col-md-3:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+    }
+    
+    .chart-area {
+        height: 300px;
+    }
+}
+
+/* Loading animation */
+.spinner-border {
+    animation: spinner-border .75s linear infinite;
+}
+
+@keyframes spinner-border {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Form select styling */
+.form-select-sm {
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.2rem;
+}
 </style>
 {% endblock %}
 
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-// Placeholder charts - will be populated with real data later
+// Enhanced Charts with dynamic data loading
 document.addEventListener('DOMContentLoaded', function() {
-    // Area Chart
-    const areaCtx = document.getElementById('myAreaChart');
-    if (areaCtx) {
-        new Chart(areaCtx, {
+    let cashFlowChart;
+    
+    // Initialize selectors
+    const periodSelector = document.getElementById('periodSelector');
+    const yearSelector = document.getElementById('yearSelector');
+    const chartLoading = document.getElementById('chartLoading');
+    const chartContainer = document.getElementById('chartContainer');
+    
+    // Stats elements
+    const statsIncome = document.getElementById('statsIncome');
+    const statsExpenses = document.getElementById('statsExpenses');
+    const statsNetFlow = document.getElementById('statsNetFlow');
+    const statsBalance = document.getElementById('statsBalance');
+    
+    // Set current year as default
+    const currentYear = new Date().getFullYear();
+    if (yearSelector) {
+        // Add current year option if not present
+        if (![...yearSelector.options].find(opt => opt.value == currentYear)) {
+            const currentYearOption = new Option(currentYear.toString(), currentYear.toString());
+            yearSelector.insertBefore(currentYearOption, yearSelector.firstChild);
+        }
+        yearSelector.value = currentYear;
+    }
+    
+    // Function to format currency
+    function formatCurrency(value) {
+        return new Intl.NumberFormat('th-TH', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(value) + ' ฿';
+    }
+    
+    // Function to update statistics
+    function updateStats(summary) {
+        statsIncome.textContent = formatCurrency(summary.total_income);
+        statsExpenses.textContent = formatCurrency(summary.total_expenses);
+        
+        const netFlow = summary.net_flow;
+        statsNetFlow.textContent = formatCurrency(netFlow);
+        statsNetFlow.className = `h6 mb-0 ${netFlow >= 0 ? 'text-success' : 'text-danger'}`;
+        
+        const balance = summary.final_balance;
+        statsBalance.textContent = formatCurrency(balance);
+        statsBalance.className = `h6 mb-0 ${balance >= 0 ? 'text-success' : 'text-danger'}`;
+    }
+    
+    // Function to load chart data
+    async function loadChartData(period = 'year', year = currentYear) {
+        try {
+            // Show loading
+            chartLoading.style.display = 'block';
+            chartContainer.style.opacity = '0.3';
+            
+            const response = await fetch(`{% url 'get_cashflow_data' %}?period=${period}&year=${year}`);
+            const data = await response.json();
+            
+            // Update statistics
+            updateStats(data.summary);
+            
+            // Update chart
+            updateChart(data);
+            
+        } catch (error) {
+            console.error('Error loading chart data:', error);
+        } finally {
+            // Hide loading
+            chartLoading.style.display = 'none';
+            chartContainer.style.opacity = '1';
+        }
+    }
+    
+    // Function to update chart
+    function updateChart(data) {
+        const areaCtx = document.getElementById('myAreaChart');
+        if (!areaCtx) return;
+        
+        // Destroy existing chart
+        if (cashFlowChart) {
+            cashFlowChart.destroy();
+        }
+        
+        cashFlowChart = new Chart(areaCtx, {
             type: 'line',
             data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                datasets: [{
-                    label: 'Income',
-                    data: [0, 0, 0, 0, 0, 0],
-                    borderColor: '#1cc88a',
-                    backgroundColor: 'rgba(28, 200, 138, 0.1)',
-                    fill: true
-                }, {
-                    label: 'Expenses',
-                    data: [0, 0, 0, 0, 0, 0],
-                    borderColor: '#e74a3b',
-                    backgroundColor: 'rgba(231, 74, 59, 0.1)',
-                    fill: true
-                }]
+                labels: data.labels,
+                datasets: [
+                    {
+                        label: 'รายรับ',
+                        data: data.datasets.income,
+                        borderColor: '#1cc88a',
+                        backgroundColor: 'rgba(28, 200, 138, 0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'รายจ่าย',
+                        data: data.datasets.expenses,
+                        borderColor: '#e74a3b',
+                        backgroundColor: 'rgba(231, 74, 59, 0.1)',
+                        fill: true,
+                        tension: 0.3,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'กำไรสุทธิ',
+                        data: data.datasets.net_flow,
+                        borderColor: '#4e73df',
+                        backgroundColor: 'rgba(78, 115, 223, 0.1)',
+                        fill: false,
+                        tension: 0.3,
+                        borderWidth: 3,
+                        pointRadius: 4,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'ยอดสะสม',
+                        data: data.datasets.running_balance,
+                        borderColor: '#f6c23e',
+                        backgroundColor: 'rgba(246, 194, 62, 0.1)',
+                        fill: false,
+                        tension: 0.3,
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        yAxisID: 'y1'
+                    }
+                ]
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                            pointStyle: 'circle'
+                        }
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.dataset.label || '';
+                                const value = context.parsed.y;
+                                return label + ': ' + formatCurrency(value);
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        display: true,
+                        grid: {
+                            display: true,
+                            color: 'rgba(0,0,0,0.1)'
+                        }
+                    },
+                    y: {
+                        type: 'linear',
+                        display: true,
+                        position: 'left',
+                        beginAtZero: true,
+                        grid: {
+                            display: true,
+                            color: 'rgba(0,0,0,0.1)'
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return formatCurrency(value);
+                            }
+                        }
+                    },
+                    y1: {
+                        type: 'linear',
+                        display: true,
+                        position: 'right',
+                        grid: {
+                            drawOnChartArea: false,
+                        },
+                        ticks: {
+                            callback: function(value) {
+                                return formatCurrency(value);
+                            }
+                        }
+                    }
+                },
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                }
             }
         });
     }
-
-    // Pie Chart
+    
+    // Event listeners for selectors
+    if (periodSelector) {
+        periodSelector.addEventListener('change', function() {
+            const period = this.value;
+            const year = yearSelector ? yearSelector.value : currentYear;
+            
+            // Hide year selector for non-year periods
+            if (yearSelector) {
+                yearSelector.style.display = period === 'year' ? 'block' : 'none';
+            }
+            
+            loadChartData(period, year);
+        });
+    }
+    
+    if (yearSelector) {
+        yearSelector.addEventListener('change', function() {
+            const period = periodSelector ? periodSelector.value : 'year';
+            const year = this.value;
+            loadChartData(period, year);
+        });
+    }
+    
+    // Initial load
+    loadChartData();
+    
+    // Pie Chart - Expense Categories (unchanged)
     const pieCtx = document.getElementById('myPieChart');
     if (pieCtx) {
         new Chart(pieCtx, {
             type: 'pie',
             data: {
-                labels: ['No data yet'],
+                labels: {{ expense_categories.labels|safe }},
                 datasets: [{
-                    data: [1],
-                    backgroundColor: ['#e3e6f0']
+                    data: {{ expense_categories.data|safe }},
+                    backgroundColor: {{ expense_categories.colors|safe }}
                 }]
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'bottom'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return label + ': ' + formatCurrency(value) + ' (' + percentage + '%)';
+                            }
+                        }
+                    }
+                }
             }
         });
     }
