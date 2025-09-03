@@ -4,11 +4,14 @@
 
 {% block extra_css %}
 <style>
+    body {
+        background-color: #f5f6fa;
+    }
     .delete-container {
         max-width: 500px;
         margin: 50px auto;
     }
-    
+    /* ...existing code... */
     .category-preview {
         display: inline-block;
         padding: 15px 25px;
@@ -16,14 +19,13 @@
         color: white;
         font-weight: bold;
         margin: 10px 0;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        box-shadow: 0 2px 10px rgba(165, 155, 155, 0.99);
     }
-    
+    /* ...existing code... */
     .icon-preview {
         font-size: 1.5rem;
         margin-right: 10px;
     }
-    
     .warning-box {
         background: #fff3cd;
         border: 1px solid #ffeaa7;
@@ -31,7 +33,6 @@
         padding: 20px;
         margin: 20px 0;
     }
-    
     .danger-zone {
         background: #f8d7da;
         border: 1px solid #f5c6cb;
