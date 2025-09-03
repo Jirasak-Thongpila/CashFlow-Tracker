@@ -1,0 +1,286 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - CashFlow Tracker{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-container {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    .preview-section {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .category-preview {
+        display: inline-block;
+        padding: 15px 25px;
+        border-radius: 25px;
+        color: white;
+        font-weight: bold;
+        margin: 10px;
+        min-width: 150px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .icon-preview {
+        font-size: 1.5rem;
+        margin-right: 10px;
+    }
+    
+    .color-option {
+        display: inline-block;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        margin: 2px;
+        border: 2px solid #ddd;
+        cursor: pointer;
+    }
+    
+    .color-option.selected {
+        border-color: #007bff;
+        box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+    }
+    
+    .icon-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+        gap: 10px;
+        margin-top: 10px;
+    }
+    
+    .icon-option {
+        width: 50px;
+        height: 50px;
+        border: 2px solid #ddd;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .icon-option:hover {
+        border-color: #007bff;
+        transform: scale(1.05);
+    }
+    
+    .icon-option.selected {
+        border-color: #007bff;
+        background-color: rgba(0,123,255,0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="form-container">
+        <!-- Header -->
+        <div class="row mb-4">
+            <div class="col">
+                <h1 class="h2"><i class="fas fa-tag me-2"></i>{{ title }}</h1>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{% url 'category_list' %}">หมวดหมู่</a></li>
+                        <li class="breadcrumb-item active">{{ title }}</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Preview Section -->
+        <div class="preview-section">
+            <h5 class="mb-3">ตัวอย่างหมวดหมู่</h5>
+            <div class="category-preview" id="categoryPreview" style="background-color: #FF6B6B;">
+                <span class="icon-preview" id="iconPreview">💰</span>
+                <span id="namePreview">ชื่อหมวดหมู่</span>
+            </div>
+            <div class="mt-2">
+                <span class="badge bg-secondary" id="typePreview">เลือกประเภท</span>
+            </div>
+        </div>
+
+        <!-- Form -->
+        <form method="post" class="card">
+            {% csrf_token %}
+            <div class="card-body">
+                <!-- Category Name -->
+                <div class="mb-4">
+                    <label class="form-label">{{ form.name.label }}</label>
+                    {{ form.name }}
+                    {% if form.name.errors %}
+                        <div class="text-danger mt-1">
+                            {% for error in form.name.errors %}
+                                <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Category Type -->
+                <div class="mb-4">
+                    <label class="form-label">{{ form.category_type.label }}</label>
+                    {{ form.category_type }}
+                    {% if form.category_type.errors %}
+                        <div class="text-danger mt-1">
+                            {% for error in form.category_type.errors %}
+                                <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Icon Selection -->
+                <div class="mb-4">
+                    <label class="form-label">{{ form.icon.label }}</label>
+                    {{ form.icon }}
+                    <div class="icon-grid" id="iconGrid">
+                        <!-- Icons will be populated by JavaScript -->
+                    </div>
+                    {% if form.icon.errors %}
+                        <div class="text-danger mt-1">
+                            {% for error in form.icon.errors %}
+                                <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Color Selection -->
+                <div class="mb-4">
+                    <label class="form-label">{{ form.color.label }}</label>
+                    {{ form.color }}
+                    <div class="mt-2" id="colorGrid">
+                        <!-- Colors will be populated by JavaScript -->
+                    </div>
+                    {% if form.color.errors %}
+                        <div class="text-danger mt-1">
+                            {% for error in form.color.errors %}
+                                <small>{{ error }}</small>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card-footer">
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'category_list' %}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>ยกเลิก
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>บันทึก
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const nameField = document.getElementById('id_name');
+        const typeField = document.getElementById('id_category_type');
+        const iconField = document.getElementById('id_icon');
+        const colorField = document.getElementById('id_color');
+        
+        const namePreview = document.getElementById('namePreview');
+        const typePreview = document.getElementById('typePreview');
+        const iconPreview = document.getElementById('iconPreview');
+        const categoryPreview = document.getElementById('categoryPreview');
+        const iconGrid = document.getElementById('iconGrid');
+        const colorGrid = document.getElementById('colorGrid');
+
+        // Hide original select elements
+        iconField.style.display = 'none';
+        colorField.style.display = 'none';
+
+        // Create icon grid
+        const iconOptions = Array.from(iconField.options).slice(1); // Skip empty option
+        iconOptions.forEach(option => {
+            const iconDiv = document.createElement('div');
+            iconDiv.className = 'icon-option';
+            iconDiv.textContent = option.value;
+            iconDiv.onclick = () => selectIcon(option.value, iconDiv);
+            iconGrid.appendChild(iconDiv);
+        });
+
+        // Create color grid
+        const colorOptions = Array.from(colorField.options).slice(1); // Skip empty option
+        colorOptions.forEach(option => {
+            const colorDiv = document.createElement('div');
+            colorDiv.className = 'color-option';
+            colorDiv.style.backgroundColor = option.value;
+            colorDiv.onclick = () => selectColor(option.value, colorDiv);
+            colorGrid.appendChild(colorDiv);
+        });
+
+        // Select icon function
+        function selectIcon(value, element) {
+            iconField.value = value;
+            document.querySelectorAll('.icon-option').forEach(el => el.classList.remove('selected'));
+            element.classList.add('selected');
+            updatePreview();
+        }
+
+        // Select color function
+        function selectColor(value, element) {
+            colorField.value = value;
+            document.querySelectorAll('.color-option').forEach(el => el.classList.remove('selected'));
+            element.classList.add('selected');
+            updatePreview();
+        }
+
+        // Update preview function
+        function updatePreview() {
+            const name = nameField.value || 'ชื่อหมวดหมู่';
+            const type = typeField.value;
+            const icon = iconField.value || '💰';
+            const color = colorField.value || '#FF6B6B';
+
+            namePreview.textContent = name;
+            iconPreview.textContent = icon;
+            categoryPreview.style.backgroundColor = color;
+
+            if (type === 'income') {
+                typePreview.textContent = 'รายรับ';
+                typePreview.className = 'badge bg-success';
+            } else if (type === 'expense') {
+                typePreview.textContent = 'รายจ่าย';
+                typePreview.className = 'badge bg-danger';
+            } else {
+                typePreview.textContent = 'เลือกประเภท';
+                typePreview.className = 'badge bg-secondary';
+            }
+        }
+
+        // Set initial selections
+        if (iconField.value) {
+            const selectedIcon = iconGrid.querySelector(`[onclick*="${iconField.value}"]`);
+            if (selectedIcon) selectedIcon.classList.add('selected');
+        }
+
+        if (colorField.value) {
+            const selectedColor = colorGrid.querySelector(`[style*="${colorField.value}"]`);
+            if (selectedColor) selectedColor.classList.add('selected');
+        }
+
+        // Event listeners
+        nameField.addEventListener('input', updatePreview);
+        typeField.addEventListener('change', updatePreview);
+
+        // Initial preview update
+        updatePreview();
+    });
+</script>
+{% endblock %}

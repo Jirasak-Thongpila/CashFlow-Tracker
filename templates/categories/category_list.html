@@ -1,0 +1,200 @@
+{% extends 'base.html' %}
+
+{% block title %}หมวดหมู่ - CashFlow Tracker{% endblock %}
+
+{% block extra_css %}
+<style>
+    .category-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border: 2px solid transparent;
+    }
+
+    .category-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .category-icon {
+        font-size: 2rem;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 10px;
+        color: white;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    }
+
+    .category-type-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        font-size: 0.75rem;
+    }
+
+    .income-badge {
+        background-color: #28a745;
+    }
+
+    .expense-badge {
+        background-color: #dc3545;
+    }
+
+    .stats-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .filter-section {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 30px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <h1 class="h2"><i class="fas fa-tags me-2"></i>จัดการหมวดหมู่</h1>
+            <p class="text-muted">จัดการหมวดหมู่รายรับและรายจ่ายของคุณ</p>
+        </div>
+        <div class="col-md-6 text-end">
+            <a href="{% url 'category_create' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>สร้างหมวดหมู่ใหม่
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card stats-card">
+                <div class="card-body text-center">
+                    <i class="fas fa-arrow-up fa-2x mb-2"></i>
+                    <h3>{{ income_count }}</h3>
+                    <p class="mb-0">หมวดหมู่รายรับ</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stats-card">
+                <div class="card-body text-center">
+                    <i class="fas fa-arrow-down fa-2x mb-2"></i>
+                    <h3>{{ expense_count }}</h3>
+                    <p class="mb-0">หมวดหมู่รายจ่าย</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card stats-card">
+                <div class="card-body text-center">
+                    <i class="fas fa-tags fa-2x mb-2"></i>
+                    <h3>{{ income_count|add:expense_count }}</h3>
+                    <p class="mb-0">ทั้งหมด</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                {{ filter_form.category_type }}
+            </div>
+            <div class="col-md-6">
+                {{ filter_form.search }}
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-outline-primary w-100">
+                    <i class="fas fa-search me-1"></i>ค้นหา
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Categories Grid -->
+    {% if categories %}
+        <div class="row">
+            {% for category in categories %}
+                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                    <div class="card category-card h-100 position-relative">
+                        <span class="badge category-type-badge {% if category.category_type == 'income' %}income-badge{% else %}expense-badge{% endif %}">
+                            {% if category.category_type == 'income' %}รายรับ{% else %}รายจ่าย{% endif %}
+                        </span>
+
+                        <div class="card-body text-center">
+                            <div class="category-icon" style="background-color: {{ category.color|default_if_none:'#6c757d' }};">
+                                {{ category.icon }}
+                            </div>
+                            <h6 class="card-title mb-2">{{ category.name }}</h6>
+                            <small class="text-muted">{{ category.get_category_type_display }}</small>
+                        </div>
+
+                        <div class="card-footer bg-transparent border-0 text-center">
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'category_edit' category.pk %}" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'category_delete' category.pk %}" class="btn btn-outline-danger btn-sm">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if categories.has_other_pages %}
+            <nav aria-label="Categories pagination" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if categories.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if request.GET.category_type %}category_type={{ request.GET.category_type }}&{% endif %}{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}page={{ categories.previous_page_number }}">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+
+                    {% for num in categories.paginator.page_range %}
+                        {% if categories.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > categories.number|add:-3 and num < categories.number|add:3 %}
+                            <li class="page-item">
+                                <a class="page-link" href="?{% if request.GET.category_type %}category_type={{ request.GET.category_type }}&{% endif %}{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}page={{ num }}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if categories.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% if request.GET.category_type %}category_type={{ request.GET.category_type }}&{% endif %}{% if request.GET.search %}search={{ request.GET.search }}&{% endif %}page={{ categories.next_page_number }}">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% endif %}
+    {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-tags fa-4x text-muted mb-3"></i>
+            <h4 class="text-muted">ไม่มีหมวดหมู่</h4>
+            <p class="text-muted mb-4">คุณยังไม่มีหมวดหมู่ใดๆ เริ่มต้นสร้างหมวดหมู่แรกของคุณ</p>
+            <a href="{% url 'category_create' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>สร้างหมวดหมู่ใหม่
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
