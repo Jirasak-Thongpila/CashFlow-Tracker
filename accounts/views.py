@@ -24,7 +24,7 @@ def get_dashboard_stats(user, cache_key_suffix=""):
         totals = transactions.totals_summary()
         
         total_income = totals['total_income'] or 0
-        total_expenses = totals['total_expenses'] or 0
+        total_expenses = totals['total_expense'] or 0
         net_balance = total_income - total_expenses
         
         # Calculate current month balance
@@ -32,7 +32,7 @@ def get_dashboard_stats(user, cache_key_suffix=""):
         current_month_start = today.replace(day=1)
         current_month_transactions = transactions.for_period(start_date=current_month_start)
         current_month_totals = current_month_transactions.totals_summary()
-        current_month_balance = (current_month_totals['total_income'] or 0) - (current_month_totals['total_expenses'] or 0)
+        current_month_balance = (current_month_totals['total_income'] or 0) - (current_month_totals['total_expense'] or 0)
         
         # Additional stats
         additional_stats = {
@@ -104,7 +104,7 @@ def dashboard(request):
         month_totals = month_transactions.totals_summary()
         
         monthly_income.append(float(month_totals['total_income'] or 0))
-        monthly_expenses.append(float(month_totals['total_expenses'] or 0))
+        monthly_expenses.append(float(month_totals['total_expense'] or 0))
     
     # Generate expense categories data for pie chart
     expense_categories_data = transactions.expenses().values(
