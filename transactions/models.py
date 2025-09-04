@@ -1,9 +1,56 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.db.models import Sum, Q
 from categories.models import Category
 from decimal import Decimal
 
 User = get_user_model()
+
+class TransactionQuerySet(models.QuerySet):
+    def for_user(self, user):
+        return self.filter(user=user).select_related('category')
+    
+    def income(self):
+        return self.filter(transaction_type='income')
+    
+    def expenses(self):
+        return self.filter(transaction_type='expense')
+    
+    def for_period(self, start_date=None, end_date=None):
+        queryset = self
+        if start_date:
+            queryset = queryset.filter(date__gte=start_date)
+        if end_date:
+            queryset = queryset.filter(date__lte=end_date)
+        return queryset
+    
+    def for_category(self, category):
+        return self.filter(category=category)
+    
+    def totals_summary(self):
+        return self.aggregate(
+            total_income=Sum('amount', filter=Q(transaction_type='income')) or 0,
+            total_expense=Sum('amount', filter=Q(transaction_type='expense')) or 0
+        )
+    
+    def search(self, query):
+        return self.filter(
+            Q(description__icontains=query) | 
+            Q(notes__icontains=query)
+        )
+
+class TransactionManager(models.Manager):
+    def get_queryset(self):
+        return TransactionQuerySet(self.model, using=self._db)
+    
+    def for_user(self, user):
+        return self.get_queryset().for_user(user)
+    
+    def income(self):
+        return self.get_queryset().income()
+    
+    def expenses(self):
+        return self.get_queryset().expenses()
 
 class Transaction(models.Model):
     TRANSACTION_TYPES = [
@@ -21,6 +68,8 @@ class Transaction(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='วันที่สร้าง')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='วันที่แก้ไขล่าสุด')
     
+    objects = TransactionManager()
+    
     class Meta:
         verbose_name = 'รายการธุรกรรม'
         verbose_name_plural = 'รายการธุรกรรม'
@@ -29,6 +78,10 @@ class Transaction(models.Model):
             models.Index(fields=['user', 'date']),
             models.Index(fields=['user', 'transaction_type']),
             models.Index(fields=['user', 'category']),
+            models.Index(fields=['user', 'transaction_type', 'date']),
+            models.Index(fields=['user', 'category', 'date']),
+            models.Index(fields=['date', 'created_at']),
+            models.Index(fields=['user', 'amount']),
         ]
     
     def __str__(self):

@@ -2,10 +2,59 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import login
 from django.contrib import messages
+from django.core.cache import cache
+from django.conf import settings
 from datetime import datetime, timedelta
 from django.utils import timezone
 from django.db.models import Sum, Count, Q
 from .forms import CustomUserCreationForm
+
+def get_dashboard_stats(user, cache_key_suffix=""):
+    """Get cached dashboard statistics for a user"""
+    cache_key = f"dashboard_stats_{user.id}_{cache_key_suffix}"
+    stats = cache.get(cache_key)
+    
+    if stats is None:
+        from transactions.models import Transaction
+        
+        # Get user's transactions with optimized queries
+        transactions = Transaction.objects.for_user(user)
+        
+        # Calculate total income and expenses using optimized manager method
+        totals = transactions.totals_summary()
+        
+        total_income = totals['total_income'] or 0
+        total_expenses = totals['total_expenses'] or 0
+        net_balance = total_income - total_expenses
+        
+        # Calculate current month balance
+        today = timezone.now().date()
+        current_month_start = today.replace(day=1)
+        current_month_transactions = transactions.for_period(start_date=current_month_start)
+        current_month_totals = current_month_transactions.totals_summary()
+        current_month_balance = (current_month_totals['total_income'] or 0) - (current_month_totals['total_expenses'] or 0)
+        
+        # Additional stats
+        additional_stats = {
+            'total_transactions': transactions.count(),
+            'income_transactions': transactions.income().count(),
+            'expense_transactions': transactions.expenses().count(),
+            'categories_used': transactions.values('category').distinct().count(),
+        }
+        
+        stats = {
+            'total_income': total_income,
+            'total_expenses': total_expenses,
+            'net_balance': net_balance,
+            'current_month_balance': current_month_balance,
+            'stats': additional_stats,
+            'transactions_queryset': transactions,  # For other calculations
+        }
+        
+        # Cache for 5 minutes by default
+        cache.set(cache_key, stats, getattr(settings, 'CACHE_TTL', 300))
+    
+    return stats
 
 def register(request):
     if request.method == 'POST':
@@ -27,30 +76,11 @@ def dashboard(request):
     
     # Get current date and calculate date ranges
     today = timezone.now().date()
-    current_month_start = today.replace(day=1)
     current_year = today.year
     
-    # Get user's transactions
-    transactions = Transaction.objects.filter(user=request.user)
-    
-    # Calculate total income and expenses
-    totals = transactions.aggregate(
-        total_income=Sum('amount', filter=Q(transaction_type='income')) or 0,
-        total_expenses=Sum('amount', filter=Q(transaction_type='expense')) or 0
-    )
-    
-    total_income = totals['total_income'] or 0
-    total_expenses = totals['total_expenses'] or 0
-    net_balance = total_income - total_expenses
-    
-    # Calculate current month balance
-    current_month_transactions = transactions.filter(date__gte=current_month_start)
-    current_month_totals = current_month_transactions.aggregate(
-        month_income=Sum('amount', filter=Q(transaction_type='income')) or 0,
-        month_expenses=Sum('amount', filter=Q(transaction_type='expense')) or 0
-    )
-    
-    current_month_balance = (current_month_totals['month_income'] or 0) - (current_month_totals['month_expenses'] or 0)
+    # Get cached dashboard statistics
+    cached_stats = get_dashboard_stats(request.user, f"dashboard_{today.strftime('%Y%m%d')}")
+    transactions = cached_stats['transactions_queryset']
     
     # Get recent transactions (last 5)
     recent_transactions = transactions.order_by('-date', '-created_at')[:5]
@@ -64,17 +94,20 @@ def dashboard(request):
         month_name = datetime(current_year, month, 1).strftime('%b')
         monthly_labels.append(month_name)
         
-        month_transactions = transactions.filter(date__year=current_year, date__month=month)
-        month_totals = month_transactions.aggregate(
-            income=Sum('amount', filter=Q(transaction_type='income')) or 0,
-            expenses=Sum('amount', filter=Q(transaction_type='expense')) or 0
-        )
+        month_start = datetime(current_year, month, 1).date()
+        if month < 12:
+            month_end = datetime(current_year, month + 1, 1).date() - timedelta(days=1)
+        else:
+            month_end = datetime(current_year, 12, 31).date()
         
-        monthly_income.append(float(month_totals['income'] or 0))
-        monthly_expenses.append(float(month_totals['expenses'] or 0))
+        month_transactions = transactions.for_period(start_date=month_start, end_date=month_end)
+        month_totals = month_transactions.totals_summary()
+        
+        monthly_income.append(float(month_totals['total_income'] or 0))
+        monthly_expenses.append(float(month_totals['total_expenses'] or 0))
     
     # Generate expense categories data for pie chart
-    expense_categories_data = transactions.filter(transaction_type='expense').values(
+    expense_categories_data = transactions.expenses().values(
         'category__name', 'category__color', 'category__icon'
     ).annotate(
         total=Sum('amount')
@@ -102,20 +135,15 @@ def dashboard(request):
             'colors': ['#e3e6f0']
         }
     
-    # Additional stats
-    stats = {
-        'total_transactions': transactions.count(),
-        'income_transactions': transactions.filter(transaction_type='income').count(),
-        'expense_transactions': transactions.filter(transaction_type='expense').count(),
-        'categories_used': transactions.values('category').distinct().count(),
-    }
+    # Use cached stats
+    stats = cached_stats['stats']
     
     context = {
         'user': request.user,
-        'total_income': total_income,
-        'total_expenses': total_expenses,
-        'net_balance': net_balance,
-        'current_month_balance': current_month_balance,
+        'total_income': cached_stats['total_income'],
+        'total_expenses': cached_stats['total_expenses'],
+        'net_balance': cached_stats['net_balance'],
+        'current_month_balance': cached_stats['current_month_balance'],
         'recent_transactions': recent_transactions,
         'stats': stats,
         'monthly_data': {
@@ -144,7 +172,7 @@ def get_cashflow_data(request):
         year = timezone.now().year
     
     today = timezone.now().date()
-    transactions = Transaction.objects.filter(user=request.user)
+    transactions = Transaction.objects.for_user(request.user)
     
     labels = []
     income_data = []

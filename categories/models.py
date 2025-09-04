@@ -3,6 +3,35 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+class CategoryQuerySet(models.QuerySet):
+    def for_user(self, user):
+        return self.filter(user=user)
+    
+    def income_categories(self):
+        return self.filter(category_type='income')
+    
+    def expense_categories(self):
+        return self.filter(category_type='expense')
+    
+    def default_categories(self):
+        return self.filter(is_default=True)
+    
+    def custom_categories(self):
+        return self.filter(is_default=False)
+
+class CategoryManager(models.Manager):
+    def get_queryset(self):
+        return CategoryQuerySet(self.model, using=self._db)
+    
+    def for_user(self, user):
+        return self.get_queryset().for_user(user)
+    
+    def income_categories(self):
+        return self.get_queryset().income_categories()
+    
+    def expense_categories(self):
+        return self.get_queryset().expense_categories()
+
 class Category(models.Model):
     CATEGORY_TYPES = [
         ('income', 'รายรับ'),
@@ -59,11 +88,18 @@ class Category(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='วันที่สร้าง')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='วันที่แก้ไขล่าสุด')
     
+    objects = CategoryManager()
+    
     class Meta:
         verbose_name = 'หมวดหมู่'
         verbose_name_plural = 'หมวดหมู่'
         ordering = ['category_type', 'name']
         unique_together = ['user', 'name', 'category_type']
+        indexes = [
+            models.Index(fields=['user', 'category_type']),
+            models.Index(fields=['user', 'is_default']),
+            models.Index(fields=['category_type', 'name']),
+        ]
     
     def __str__(self):
         return f"{self.get_category_type_display()} - {self.name}"
