@@ -5,8 +5,199 @@
 {% block extra_css %}
 <style>
     .form-container {
-        max-width: 600px;
+        max-width: 800px;
         margin: 0 auto;
+    }
+
+    /* Gradient Text Effect */
+    .gradient-text {
+        background: linear-gradient(135deg, #2380dd 0%, #1a65b0 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-weight: 700;
+    }
+
+    /* Header Styling */
+    .page-header {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 1.5rem 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(35, 128, 221, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    .page-header:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(35, 128, 221, 0.15);
+    }
+
+    .header-content h1 {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .title-icon {
+        background: linear-gradient(135deg, #2380dd 0%, #1a65b0 100%);
+        width: 50px;
+        height: 50px;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 15px rgba(35, 128, 221, 0.3);
+        transition: all 0.3s ease;
+    }
+
+    .title-icon i {
+        font-size: 1.5rem;
+        color: white;
+    }
+
+    .page-header:hover .title-icon {
+        transform: rotate(-15deg) scale(1.1);
+    }
+
+    /* Custom Breadcrumb */
+    .custom-breadcrumb {
+        background: linear-gradient(135deg, rgba(35, 128, 221, 0.1) 0%, rgba(26, 101, 176, 0.1) 100%);
+        padding: 0.75rem 1.25rem;
+        border-radius: 10px;
+        margin: 0;
+    }
+
+    .gradient-link {
+        background: linear-gradient(135deg, #2380dd 0%, #1a65b0 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-decoration: none;
+        font-weight: 500;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .gradient-link::after {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 2px;
+        bottom: -2px;
+        left: 0;
+        background: linear-gradient(135deg, #2380dd 0%, #1a65b0 100%);
+        transform: scaleX(0);
+        transform-origin: right;
+        transition: transform 0.3s ease;
+    }
+
+    .gradient-link:hover::after {
+        transform: scaleX(1);
+        transform-origin: left;
+    }
+
+    .breadcrumb-item.active {
+        color: #1a65b0;
+        font-weight: 600;
+    }
+    
+    /* Card Sections */
+    .form-section {
+        background: rgba(255, 255, 255, 0.98);
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid rgba(35, 128, 221, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .form-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #2380dd, #1a65b0);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .form-section:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 30px rgba(35, 128, 221, 0.15);
+        border-color: rgba(35, 128, 221, 0.3);
+    }
+
+    .form-section:hover::before {
+        opacity: 1;
+    }
+    
+    /* Section Headers with Gradient */
+    .form-section-title {
+        background: linear-gradient(135deg, #2380dd 0%, #1a65b0 100%);
+        color: #ffffff;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        font-size: 1.2rem;
+        font-weight: 600;
+        padding: 1.2rem 1.8rem;
+        border-radius: 15px;
+        margin: -2rem -2rem 2rem -2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        box-shadow: 0 4px 15px rgba(35, 128, 221, 0.2);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .form-section-title::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .form-section-title:hover::after {
+        opacity: 1;
+    }
+
+    .form-section-title i {
+        font-size: 1.4em;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.5rem;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .form-section-title:hover i {
+        transform: scale(1.1) rotate(-5deg);
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* Sub-sections within form sections */
+    .form-subsection {
+        background: rgba(35, 128, 221, 0.03);
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin: 1rem 0;
+        border: 1px solid rgba(35, 128, 221, 0.08);
+        transition: all 0.3s ease;
+    }
+
+    .form-subsection:hover {
+        background: rgba(35, 128, 221, 0.05);
+        border-color: rgba(35, 128, 221, 0.15);
     }
     
     .preview-section {
@@ -38,19 +229,6 @@
         margin-left: 10px;
     }
     
-    .form-section {
-        margin-bottom: 2rem;
-    }
-    
-    .form-section-title {
-        font-size: 1.1rem;
-        font-weight: 600;
-        margin-bottom: 1rem;
-        color: #495057;
-        border-bottom: 2px solid #e9ecef;
-        padding-bottom: 0.5rem;
-    }
-    
     .required-field {
         position: relative;
     }
@@ -66,12 +244,21 @@
 <div class="container">
     <div class="form-container">
         <!-- Header -->
-        <div class="row mb-4">
-            <div class="col">
-                <h1 class="h2"><i class="fas fa-plus-circle me-2"></i>{{ title }}</h1>
+        <div class="page-header mb-4">
+            <div class="header-content">
+                <h1 class="h2">
+                    <div class="title-icon">
+                        <i class="fas fa-plus-circle"></i>
+                    </div>
+                    <span class="gradient-text">{{ title }}</span>
+                </h1>
                 <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="{% url 'transaction_list' %}">รายการธุรกรรม</a></li>
+                    <ol class="breadcrumb custom-breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a href="{% url 'transaction_list' %}" class="gradient-link">
+                                <i class="fas fa-list me-1"></i>รายการธุรกรรม
+                            </a>
+                        </li>
                         <li class="breadcrumb-item active">{{ title }}</li>
                     </ol>
                 </nav>
