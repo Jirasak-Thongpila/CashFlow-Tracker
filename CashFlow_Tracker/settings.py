@@ -12,6 +12,17 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+from django.core.exceptions import ImproperlyConfigured
+
+def get_env_variable(var_name, default=None):
+    """Get an environment variable or raise an exception if not found."""
+    try:
+        return os.environ[var_name]
+    except KeyError:
+        if default is not None:
+            return default
+        error_msg = f"Set the {var_name} environment variable"
+        raise ImproperlyConfigured(error_msg)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,12 +32,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-!%&)l-@-m)jublfse6o0@a@a8**uca)k_88h$$1s&fola-t@8w'
+SECRET_KEY = get_env_variable('DJANGO_SECRET_KEY', 'django-insecure-!%&)l-@-m)jublfse6o0@a@a8**uca)k_88h$$1s&fola-t@8w')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = get_env_variable('DEBUG', 'True').lower() == 'true'
 
-ALLOWED_HOSTS = ['127.0.0.1','.vercel.app',]
+ALLOWED_HOSTS = get_env_variable('ALLOWED_HOSTS', '127.0.0.1,.vercel.app').split(',')
 
 
 # Application definition
@@ -87,12 +98,16 @@ WSGI_APPLICATION = 'CashFlow_Tracker.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',
-        'USER': 'postgres.ifbbqowbocrqeoqmflgo',
-        'PASSWORD': os.environ.get('SUPABASE_DB_PASSWORD', 'tT0613828245'),
-        'HOST': 'aws-1-ap-southeast-1.pooler.supabase.com',
-        'PORT': '5432',
+        'ENGINE': get_env_variable('DB_ENGINE', 'django.db.backends.postgresql'),
+        'NAME': get_env_variable('DB_NAME', 'postgres'),
+        'USER': get_env_variable('DB_USER', 'postgres.ifbbqowbocrqeoqmflgo'),
+        'PASSWORD': get_env_variable('DB_PASSWORD', 'tT0613828245'),
+        'HOST': get_env_variable('DB_HOST', 'aws-1-ap-southeast-1.pooler.supabase.com'),
+        'PORT': get_env_variable('DB_PORT', '5432'),
+        'OPTIONS': {
+            'sslmode': 'require',
+        } if not DEBUG else {},
+        'CONN_MAX_AGE': int(get_env_variable('DB_CONN_MAX_AGE', '60')),
     }
 }
 
@@ -144,4 +159,31 @@ LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/login/'
 
-SESSION_COOKIE_AGE = 1209600
+SESSION_COOKIE_AGE = int(get_env_variable('SESSION_COOKIE_AGE', '1209600'))
+
+# Security settings
+if not DEBUG:
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_REDIRECT_EXEMPT = []
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_PRELOAD = True
+
+# Cache configuration
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'cashflow-tracker-cache',
+        'OPTIONS': {
+            'MAX_ENTRIES': int(get_env_variable('CACHE_MAX_ENTRIES', '1000')),
+            'CULL_FREQUENCY': int(get_env_variable('CACHE_CULL_FREQUENCY', '3')),
+        }
+    }
+}
+
+# Cache timeout settings
+CACHE_TTL = int(get_env_variable('CACHE_TTL', '300'))  # 5 minutes default
