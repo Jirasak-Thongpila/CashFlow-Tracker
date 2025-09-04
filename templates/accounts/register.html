@@ -1,3 +1,5 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,26 +9,223 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        
         .register-container {
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 2rem 0;
+            padding: 2rem 1rem;
+            position: relative;
+            overflow: hidden;
         }
+        
+        .register-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><circle cx="200" cy="200" r="3" fill="rgba(255,255,255,0.1)"/><circle cx="800" cy="300" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="400" cy="600" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="900" cy="800" r="3" fill="rgba(255,255,255,0.1)"/><circle cx="100" cy="700" r="2" fill="rgba(255,255,255,0.1)"/></svg>');
+            pointer-events: none;
+        }
+        
         .register-card {
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
             padding: 3rem 2.5rem;
             width: 100%;
             max-width: 500px;
+            position: relative;
+            z-index: 1;
+            border: 1px solid rgba(255, 255, 255, 0.2);
         }
+        
         .brand-logo {
             color: #667eea;
-            font-size: 2.5rem;
+            font-size: 3rem;
             margin-bottom: 1rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .register-card h2 {
+            color: #2c3e50;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-label {
+            font-weight: 500;
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+        
+        .form-control {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.9);
+        }
+        
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            background: white;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 0.875rem 2rem;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            background: linear-gradient(135deg, #5a6fd8 0%, #6b4190 100%);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+        
+        .alert {
+            border-radius: 10px;
+            border: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .alert-danger {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+            color: white;
+        }
+        
+        .alert-success {
+            background: linear-gradient(135deg, #51cf66, #40c057);
+            color: white;
+        }
+        
+        .alert-info {
+            background: linear-gradient(135deg, #74c0fc, #339af0);
+            color: white;
+        }
+        
+        .alert-warning {
+            background: linear-gradient(135deg, #ffd43b, #fab005);
+            color: white;
+        }
+        
+        .form-text {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 0.25rem;
+        }
+        
+        .text-muted {
+            color: #6c757d !important;
+        }
+        
+        a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        a:hover {
+            color: #5a6fd8;
+            text-decoration: underline;
+        }
+        
+        .input-group {
+            position: relative;
+        }
+        
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #6c757d;
+            cursor: pointer;
+            z-index: 5;
+            padding: 0;
+            font-size: 1rem;
+        }
+        
+        .password-toggle:hover {
+            color: #667eea;
+        }
+        
+        .form-floating {
+            position: relative;
+        }
+        
+        .form-floating .form-control {
+            padding: 1rem 1rem;
+        }
+        
+        @media (max-width: 576px) {
+            .register-container {
+                padding: 1rem 0.5rem;
+            }
+            
+            .register-card {
+                padding: 2rem 1.5rem;
+            }
+            
+            .brand-logo {
+                font-size: 2.5rem;
+            }
+        }
+        
+        /* Animation for form elements */
+        .form-control, .btn, .alert {
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .register-card {
+            animation: slideInScale 0.8s ease-out;
+        }
+        
+        @keyframes slideInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9) translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
         }
     </style>
 </head>
@@ -36,68 +235,204 @@
             <div class="text-center mb-4">
                 <i class="fas fa-chart-line brand-logo"></i>
                 <h2>CashFlow Tracker</h2>
-                <p class="text-muted">Create your account</p>
+                <p class="text-muted">Create your account to get started</p>
             </div>
 
+            <!-- Error Messages -->
             {% if form.errors %}
-                <div class="alert alert-danger">
-                    {% for field, errors in form.errors.items %}
-                        {% for error in errors %}
-                            <div>{{ error }}</div>
+                <div class="alert alert-danger alert-dismissible fade show">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Please fix the following errors:</strong>
+                    <ul class="mb-0 mt-2">
+                        {% for field, errors in form.errors.items %}
+                            {% for error in errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
                         {% endfor %}
-                    {% endfor %}
+                    </ul>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             {% endif %}
 
+            <!-- Success/Info Messages -->
             {% if messages %}
                 {% for message in messages %}
                     <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                        {% if message.tags == 'success' %}
+                            <i class="fas fa-check-circle me-2"></i>
+                        {% elif message.tags == 'error' or message.tags == 'danger' %}
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                        {% elif message.tags == 'info' %}
+                            <i class="fas fa-info-circle me-2"></i>
+                        {% elif message.tags == 'warning' %}
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                        {% endif %}
                         {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 {% endfor %}
             {% endif %}
 
-            <form method="post">
+            <form method="post" id="registerForm">
                 {% csrf_token %}
                 
+                <!-- Username Field -->
                 <div class="mb-3">
-                    {{ form.username.label_tag }}
-                    {{ form.username }}
+                    <label for="{{ form.username.id_for_label }}" class="form-label">
+                        <i class="fas fa-user me-2"></i>{{ form.username.label }}
+                    </label>
+                    <input type="{{ form.username.field.widget.input_type }}" 
+                           class="form-control {% if form.username.errors %}is-invalid{% endif %}" 
+                           id="{{ form.username.id_for_label }}" 
+                           name="{{ form.username.name }}" 
+                           value="{{ form.username.value|default:'' }}"
+                           placeholder="Enter your username"
+                           {% if form.username.field.required %}required{% endif %}>
+                    {% if form.username.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.username.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
                 </div>
 
+                <!-- Email Field -->
                 <div class="mb-3">
-                    {{ form.email.label_tag }}
-                    {{ form.email }}
+                    <label for="{{ form.email.id_for_label }}" class="form-label">
+                        <i class="fas fa-envelope me-2"></i>{{ form.email.label }}
+                    </label>
+                    <input type="email" 
+                           class="form-control {% if form.email.errors %}is-invalid{% endif %}" 
+                           id="{{ form.email.id_for_label }}" 
+                           name="{{ form.email.name }}" 
+                           value="{{ form.email.value|default:'' }}"
+                           placeholder="Enter your email address"
+                           {% if form.email.field.required %}required{% endif %}>
+                    {% if form.email.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.email.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
                 </div>
 
+                <!-- Password 1 Field -->
                 <div class="mb-3">
-                    {{ form.password1.label_tag }}
-                    {{ form.password1 }}
+                    <label for="{{ form.password1.id_for_label }}" class="form-label">
+                        <i class="fas fa-lock me-2"></i>{{ form.password1.label }}
+                    </label>
+                    <div class="position-relative">
+                        <input type="password" 
+                               class="form-control {% if form.password1.errors %}is-invalid{% endif %}" 
+                               id="{{ form.password1.id_for_label }}" 
+                               name="{{ form.password1.name }}"
+                               placeholder="Enter your password"
+                               {% if form.password1.field.required %}required{% endif %}>
+                        <button type="button" class="password-toggle" onclick="togglePassword('{{ form.password1.id_for_label }}', this)">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
                     {% if form.password1.help_text %}
-                        <small class="form-text text-muted">{{ form.password1.help_text }}</small>
+                        <div class="form-text">
+                            <i class="fas fa-info-circle me-1"></i>{{ form.password1.help_text }}
+                        </div>
+                    {% endif %}
+                    {% if form.password1.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.password1.errors %}{{ error }}{% endfor %}
+                        </div>
                     {% endif %}
                 </div>
 
+                <!-- Password 2 Field -->
                 <div class="mb-4">
-                    {{ form.password2.label_tag }}
-                    {{ form.password2 }}
+                    <label for="{{ form.password2.id_for_label }}" class="form-label">
+                        <i class="fas fa-lock me-2"></i>{{ form.password2.label }}
+                    </label>
+                    <div class="position-relative">
+                        <input type="password" 
+                               class="form-control {% if form.password2.errors %}is-invalid{% endif %}" 
+                               id="{{ form.password2.id_for_label }}" 
+                               name="{{ form.password2.name }}"
+                               placeholder="Confirm your password"
+                               {% if form.password2.field.required %}required{% endif %}>
+                        <button type="button" class="password-toggle" onclick="togglePassword('{{ form.password2.id_for_label }}', this)">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
                     {% if form.password2.help_text %}
-                        <small class="form-text text-muted">{{ form.password2.help_text }}</small>
+                        <div class="form-text">
+                            <i class="fas fa-info-circle me-1"></i>{{ form.password2.help_text }}
+                        </div>
+                    {% endif %}
+                    {% if form.password2.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.password2.errors %}{{ error }}{% endfor %}
+                        </div>
                     {% endif %}
                 </div>
 
+                <!-- Submit Button -->
                 <button type="submit" class="btn btn-primary w-100 py-2 mb-3">
                     <i class="fas fa-user-plus me-2"></i>Create Account
                 </button>
 
+                <!-- Login Link -->
                 <div class="text-center">
-                    <p class="mb-0">Already have an account? <a href="{% url 'login' %}">Sign in here</a></p>
+                    <p class="mb-0">
+                        Already have an account? 
+                        <a href="{% url 'login' %}">
+                            <i class="fas fa-sign-in-alt me-1"></i>Sign in here
+                        </a>
+                    </p>
                 </div>
             </form>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Toggle password visibility
+        function togglePassword(fieldId, button) {
+            const field = document.getElementById(fieldId);
+            const icon = button.querySelector('i');
+            
+            if (field.type === 'password') {
+                field.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                field.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        // Form validation feedback
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creating Account...';
+            submitBtn.disabled = true;
+            
+            // Re-enable button after 3 seconds (in case of client-side validation errors)
+            setTimeout(function() {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }, 3000);
+        });
+
+        // Auto-dismiss alerts after 5 seconds
+        document.addEventListener('DOMContentLoaded', function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                setTimeout(function() {
+                    if (alert && alert.parentNode) {
+                        const bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    }
+                }, 5000);
+            });
+        });
+    </script>
 </body>
 </html>
