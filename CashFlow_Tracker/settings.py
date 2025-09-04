@@ -35,7 +35,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = get_env_variable('DJANGO_SECRET_KEY', 'django-insecure-!%&)l-@-m)jublfse6o0@a@a8**uca)k_88h$$1s&fola-t@8w')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = get_env_variable('DEBUG', 'True').lower() == 'true'
+DEBUG = get_env_variable('DEBUG', 'False').lower() == 'true'
 
 ALLOWED_HOSTS = get_env_variable('ALLOWED_HOSTS', '127.0.0.1,.vercel.app').split(',')
 
