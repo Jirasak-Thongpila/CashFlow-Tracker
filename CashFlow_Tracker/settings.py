@@ -98,11 +98,11 @@ WSGI_APPLICATION = 'CashFlow_Tracker.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': get_env_variable('DB_ENGINE', 'django.db.backends.postgresql'),
-        'NAME': get_env_variable('DB_NAME', 'postgres'),
-        'USER': get_env_variable('DB_USER', 'postgres.ifbbqowbocrqeoqmflgo'),
-        'PASSWORD': get_env_variable('DB_PASSWORD', 'tT0613828245'),
-        'HOST': get_env_variable('DB_HOST', 'aws-1-ap-southeast-1.pooler.supabase.com'),
+        'ENGINE': get_env_variable('DB_ENGINE'),
+        'NAME': get_env_variable('DB_NAME'),
+        'USER': get_env_variable('DB_USER'),
+        'PASSWORD': get_env_variable('DB_PASSWORD'),
+        'HOST': get_env_variable('DB_HOST'),
         'PORT': get_env_variable('DB_PORT', '5432'),
         'OPTIONS': {
             'sslmode': 'require',
