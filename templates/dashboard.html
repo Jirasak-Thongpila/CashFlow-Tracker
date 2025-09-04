@@ -10,75 +10,69 @@
         </h1>
     </div>
 </div>
-
+<!-- Quick Actions -->
+<div class="row mb-4">
+    <div class="col-md-6 mb-3">
+        <a href="{% url 'transaction_create' %}" class="btn btn-success w-100 py-2">
+            <i class="fas fa-plus-circle me-2"></i>เพิ่มรายรับ
+        </a>
+    </div>
+    <div class="col-md-6 mb-3">
+        <a href="{% url 'transaction_create' %}" class="btn btn-danger w-100 py-2">
+            <i class="fas fa-minus-circle me-2"></i>เพิ่มรายจ่าย
+        </a>
+    </div>
+</div>
 <!-- Summary Cards -->
 <div class="row mb-4">
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-primary shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                            รายรับทั้งหมด
-                        </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_income|floatformat:2|default:0 }} ฿</div>
+    <div class="col-lg-4 col-md-6 mb-3">
+        <div class="card border-0 shadow-sm h-100 summary-card">
+            <div class="card-body p-3">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <div class="text-muted small mb-1">รายรับทั้งหมด</div>
+                        <div class="h4 mb-0 text-success fw-bold">{{ total_income|floatformat:2|default:0 }} ฿</div>
                     </div>
-                    <div class="col-auto">
-                        <i class="fas fa-arrow-up fa-2x text-success"></i>
+                    <div class="ms-3">
+                        <div class="bg-success bg-opacity-10 p-2 rounded-circle">
+                            <i class="fas fa-arrow-up text-success"></i>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-danger shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
-                            รายจ่ายทั้งหมด
-                        </div>
-                        <div class="h5 mb-0 font-weight-bold text-gray-800">{{ total_expenses|floatformat:2|default:0 }} ฿</div>
+    <div class="col-lg-4 col-md-6 mb-3">
+        <div class="card border-0 shadow-sm h-100 summary-card">
+            <div class="card-body p-3">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <div class="text-muted small mb-1">รายจ่ายทั้งหมด</div>
+                        <div class="h4 mb-0 text-danger fw-bold">{{ total_expenses|floatformat:2|default:0 }} ฿</div>
                     </div>
-                    <div class="col-auto">
-                        <i class="fas fa-arrow-down fa-2x text-danger"></i>
+                    <div class="ms-3">
+                        <div class="bg-danger bg-opacity-10 p-2 rounded-circle">
+                            <i class="fas fa-arrow-down text-danger"></i>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-info shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
-                            ยอดคงเหลือสุทธิ
+    <div class="col-lg-4 col-md-12 mb-3">
+        <div class="card border-0 shadow-sm h-100 summary-card">
+            <div class="card-body p-3">
+                <div class="d-flex align-items-center">
+                    <div class="flex-grow-1">
+                        <div class="text-muted small mb-1">ยอดคงเหลือสุทธิ</div>
+                        <div class="h4 mb-0 fw-bold {% if net_balance >= 0 %}text-success{% else %}text-danger{% endif %}">{{ net_balance|floatformat:2|default:0 }} ฿</div>
+                    </div>
+                    <div class="ms-3">
+                        <div class="{% if net_balance >= 0 %}bg-success{% else %}bg-danger{% endif %} bg-opacity-10 p-2 rounded-circle">
+                            <i class="fas fa-wallet {% if net_balance >= 0 %}text-success{% else %}text-danger{% endif %}"></i>
                         </div>
-                        <div class="h5 mb-0 font-weight-bold {% if net_balance >= 0 %}text-success{% else %}text-danger{% endif %}">{{ net_balance|floatformat:2|default:0 }} ฿</div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-wallet fa-2x text-info"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-xl-3 col-md-6 mb-4">
-        <div class="card border-left-warning shadow h-100 py-2">
-            <div class="card-body">
-                <div class="row no-gutters align-items-center">
-                    <div class="col mr-2">
-                        <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                            เดือนนี้
-                        </div>
-                        <div class="h5 mb-0 font-weight-bold {% if current_month_balance >= 0 %}text-success{% else %}text-danger{% endif %}">{{ current_month_balance|floatformat:2|default:0 }} ฿</div>
-                    </div>
-                    <div class="col-auto">
-                        <i class="fas fa-calendar fa-2x text-warning"></i>
                     </div>
                 </div>
             </div>
@@ -89,55 +83,42 @@
 <!-- Charts and Recent Transactions -->
 <div class="row">
     <div class="col-xl-8 col-lg-7">
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <div class="row align-items-center">
-                    <div class="col-md-6">
-                        <h6 class="m-0 font-weight-bold text-primary">Cash Flow Overview</h6>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="row g-2">
-                            <div class="col-md-6">
-                                <select id="periodSelector" class="form-select form-select-sm">
-                                    <option value="year">ปีนี้</option>
-                                    <option value="6months">6 เดือนล่าสุด</option>
-                                    <option value="3months">3 เดือนล่าสุด</option>
-                                    <option value="month">เดือนนี้</option>
-                                    <option value="week">สัปดาห์นี้</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <select id="yearSelector" class="form-select form-select-sm">
-                                    <option value="2024">2024</option>
-                                    <option value="2023">2023</option>
-                                    <option value="2022">2022</option>
-                                </select>
-                            </div>
-                        </div>
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-0 py-3">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h6 class="mb-0 fw-semibold text-dark">กราฟแสดงการเงิน</h6>
+                    <div class="d-flex gap-2">
+                        <select id="periodSelector" class="form-select form-select-sm border-0 bg-light">
+                            <option value="year">ปีนี้</option>
+                            <option value="6months">6 เดือนล่าสุด</option>
+                            <option value="3months">3 เดือนล่าสุด</option>
+                            <option value="month">เดือนนี้</option>
+                        </select>
+                        <select id="yearSelector" class="form-select form-select-sm border-0 bg-light">
+                            <option value="2024">2024</option>
+                            <option value="2023">2023</option>
+                            <option value="2022">2022</option>
+                        </select>
                     </div>
                 </div>
             </div>
-            <div class="card-body">
-                <!-- Chart Statistics Row -->
-                <div class="row mb-3" id="chartStats">
-                    <div class="col-md-3 text-center">
-                        <small class="text-muted">รายรับ</small>
-                        <div class="h6 text-success mb-0" id="statsIncome">0 ฿</div>
+            <div class="card-body p-3">
+                <!-- Compact Chart Statistics -->
+                <div class="d-flex justify-content-around py-2 mb-3 bg-light rounded" id="chartStats">
+                    <div class="text-center">
+                        <small class="text-muted d-block">รายรับ</small>
+                        <span class="fw-bold text-success small" id="statsIncome">0 ฿</span>
                     </div>
-                    <div class="col-md-3 text-center">
-                        <small class="text-muted">รายจ่าย</small>
-                        <div class="h6 text-danger mb-0" id="statsExpenses">0 ฿</div>
+                    <div class="text-center">
+                        <small class="text-muted d-block">รายจ่าย</small>
+                        <span class="fw-bold text-danger small" id="statsExpenses">0 ฿</span>
                     </div>
-                    <div class="col-md-3 text-center">
-                        <small class="text-muted">กำไรสุทธิ</small>
-                        <div class="h6 mb-0" id="statsNetFlow">0 ฿</div>
-                    </div>
-                    <div class="col-md-3 text-center">
-                        <small class="text-muted">ยอดสุทธิ</small>
-                        <div class="h6 mb-0" id="statsBalance">0 ฿</div>
+                    <div class="text-center">
+                        <small class="text-muted d-block">สุทธิ</small>
+                        <span class="fw-bold small" id="statsNetFlow">0 ฿</span>
                     </div>
                 </div>
-                
+
                 <!-- Chart Loading Indicator -->
                 <div id="chartLoading" class="text-center py-4" style="display: none;">
                     <div class="spinner-border text-primary" role="status">
@@ -145,7 +126,7 @@
                     </div>
                     <div class="mt-2 text-muted">กำลังโหลดข้อมูล...</div>
                 </div>
-                
+
                 <!-- Chart Container -->
                 <div class="chart-area" id="chartContainer">
                     <canvas id="myAreaChart" width="100%" height="40"></canvas>
@@ -155,12 +136,12 @@
     </div>
 
     <div class="col-xl-4 col-lg-5">
-        <div class="card shadow mb-4">
-            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                <h6 class="m-0 font-weight-bold text-primary">Expense Categories</h6>
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-0 py-3">
+                <h6 class="mb-0 fw-semibold text-dark">หมวดหมู่รายจ่าย</h6>
             </div>
-            <div class="card-body">
-                <div class="chart-pie pt-4 pb-2">
+            <div class="card-body p-3">
+                <div class="chart-pie">
                     <canvas id="myPieChart" width="100%" height="50"></canvas>
                 </div>
             </div>
@@ -171,180 +152,177 @@
 <!-- Recent Transactions -->
 <div class="row">
     <div class="col-12">
-        <div class="card shadow mb-4">
-            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
-                <h6 class="m-0 font-weight-bold text-primary">รายการธุรกรรมล่าสุด</h6>
-                <div>
-                    <a href="{% url 'transaction_create' %}" class="btn btn-primary btn-sm me-2">
-                        <i class="fas fa-plus me-1"></i>เพิ่มรายการ
-                    </a>
-                    <a href="{% url 'transaction_list' %}" class="btn btn-outline-primary btn-sm">
-                        <i class="fas fa-list me-1"></i>ดูทั้งหมด
-                    </a>
+        <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-white border-0 py-3">
+                <div class="d-flex align-items-center justify-content-between">
+                    <h6 class="mb-0 fw-semibold text-dark">รายการล่าสุด</h6>
+                    <div class="d-flex gap-2">
+                        <a href="{% url 'transaction_create' %}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-plus me-1"></i>เพิ่ม
+                        </a>
+                        <a href="{% url 'transaction_list' %}" class="btn btn-outline-secondary btn-sm">
+                            ดูทั้งหมด
+                        </a>
+                    </div>
                 </div>
             </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-bordered" width="100%" cellspacing="0">
-                        <thead>
-                            <tr>
-                                <th>วันที่</th>
-                                <th>รายละเอียด</th>
-                                <th>หมวดหมู่</th>
-                                <th>ประเภท</th>
-                                <th>จำนวนเงิน</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% if recent_transactions %}
-                                {% for transaction in recent_transactions %}
-                                    <tr>
-                                        <td>{{ transaction.date|date:"d M Y" }}</td>
-                                        <td>{{ transaction.description }}</td>
-                                        <td>
-                                            <span style="color: {{ transaction.category.color }};">
-                                                {{ transaction.category.icon }}
-                                            </span>
-                                            {{ transaction.category.name }}
-                                        </td>
-                                        <td>
-                                            <span class="badge {% if transaction.transaction_type == 'income' %}bg-success{% else %}bg-danger{% endif %}">
-                                                {{ transaction.get_transaction_type_display }}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span class="{% if transaction.transaction_type == 'income' %}text-success{% else %}text-danger{% endif %} font-weight-bold">
-                                                {% if transaction.transaction_type == 'income' %}+{% else %}-{% endif %}{{ transaction.amount|floatformat:2 }} ฿
-                                            </span>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                            {% else %}
-                                <tr>
-                                    <td colspan="5" class="text-center text-muted">
-                                        ยังไม่มีรายการธุรกรรม <a href="{% url 'transaction_create' %}">เพิ่มรายการแรก</a>
-                                    </td>
-                                </tr>
-                            {% endif %}
-                        </tbody>
-                    </table>
-                </div>
+            <div class="card-body p-0">
+                {% if recent_transactions %}
+                    {% for transaction in recent_transactions|slice:":5" %}
+                        <div class="d-flex align-items-center p-3 {% if not forloop.last %}border-bottom{% endif %}">
+                            <div class="me-3">
+                                <div class="p-2 rounded-circle {% if transaction.transaction_type == 'income' %}bg-success{% else %}bg-danger{% endif %} bg-opacity-10">
+                                    <span style="color: {{ transaction.category.color }};">{{ transaction.category.icon }}</span>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="fw-medium text-dark mb-1">{{ transaction.description }}</div>
+                                <div class="text-muted small">{{ transaction.date|date:"d M Y" }} • {{ transaction.category.name }}</div>
+                            </div>
+                            <div class="text-end">
+                                <div class="fw-bold {% if transaction.transaction_type == 'income' %}text-success{% else %}text-danger{% endif %}">
+                                    {% if transaction.transaction_type == 'income' %}+{% else %}-{% endif %}{{ transaction.amount|floatformat:2 }} ฿
+                                </div>
+                                <div class="badge {% if transaction.transaction_type == 'income' %}bg-success{% else %}bg-danger{% endif %} bg-opacity-10 {% if transaction.transaction_type == 'income' %}text-success{% else %}text-danger{% endif %} small">
+                                    {{ transaction.get_transaction_type_display }}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="fas fa-receipt fa-2x mb-3 opacity-25"></i>
+                        <div>ยังไม่มีรายการธุรกรรม</div>
+                        <a href="{% url 'transaction_create' %}" class="btn btn-primary btn-sm mt-2">เพิ่มรายการแรก</a>
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>
 </div>
 
-<!-- Quick Actions -->
-<div class="row">
-    <div class="col-12">
-        <div class="card shadow mb-4">
-            <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">การดำเนินการด่วน</h6>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-3 mb-3">
-                        <a href="{% url 'transaction_create' %}" class="btn btn-success btn-block">
-                            <i class="fas fa-plus-circle me-2"></i>เพิ่มรายรับ
-                        </a>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <a href="{% url 'transaction_create' %}" class="btn btn-danger btn-block">
-                            <i class="fas fa-minus-circle me-2"></i>เพิ่มรายจ่าย
-                        </a>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <a href="{% url 'transaction_list' %}" class="btn btn-info btn-block">
-                            <i class="fas fa-chart-bar me-2"></i>ดูรายงาน
-                        </a>
-                    </div>
-                    <div class="col-md-3 mb-3">
-                        <a href="{% url 'category_list' %}" class="btn btn-secondary btn-block">
-                            <i class="fas fa-tags me-2"></i>จัดการหมวดหมู่
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
+
 {% endblock %}
 
 {% block extra_css %}
 <style>
-.border-left-primary {
-    border-left: .25rem solid #4e73df !important;
-}
-.border-left-success {
-    border-left: .25rem solid #1cc88a !important;
-}
-.border-left-info {
-    border-left: .25rem solid #36b9cc !important;
-}
-.border-left-warning {
-    border-left: .25rem solid #f6c23e !important;
-}
-.border-left-danger {
-    border-left: .25rem solid #e74a3b !important;
-}
-.text-xs {
-    font-size: .7rem;
-}
-.btn-block {
-    display: block;
-    width: 100%;
+/* Dashboard Clean Theme */
+.summary-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border-radius: 12px;
 }
 
-/* Enhanced Cash Flow Chart Styles */
+.summary-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1) !important;
+}
+
+/* Chart Styles */
 #chartStats {
-    background: rgba(246, 247, 249, 0.8);
-    border-radius: 0.35rem;
-    padding: 1rem;
-    margin-bottom: 1rem;
-}
-
-#chartStats .col-md-3 {
-    border-right: 1px solid rgba(0,0,0,0.1);
-}
-
-#chartStats .col-md-3:last-child {
-    border-right: none;
+    border-radius: 8px;
+    padding: 0.75rem;
 }
 
 .chart-area {
     position: relative;
-    height: 400px;
+    height: 320px;
     transition: opacity 0.3s ease;
 }
 
-/* Responsive adjustments */
+.chart-pie {
+    position: relative;
+    height: 280px;
+}
+
+/* Card Header Improvements */
+.card-header {
+    border-bottom: 1px solid rgba(0,0,0,0.05) !important;
+}
+
+/* Form Controls */
+.form-select-sm {
+    font-size: 0.875rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+/* Button Styling */
+.btn {
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+    transform: translateY(-1px);
+}
+
+.btn-success:hover, .btn-danger:hover {
+    transform: translateY(-1px);
+}
+
+/* Responsive Design */
 @media (max-width: 768px) {
-    .card-header .row.align-items-center {
-        flex-direction: column;
+    .chart-area {
+        height: 250px;
+    }
+
+    .chart-pie {
+        height: 220px;
+    }
+
+    #chartStats {
+        flex-wrap: wrap;
         gap: 0.5rem;
     }
-    
-    .card-header .col-md-6:last-child {
-        width: 100%;
+
+    #chartStats > div {
+        flex: 1;
+        min-width: calc(50% - 0.25rem);
     }
-    
-    #chartStats .col-md-3 {
-        border-right: none;
-        border-bottom: 1px solid rgba(0,0,0,0.1);
-        margin-bottom: 0.5rem;
+
+    .d-flex.gap-2 {
+        gap: 0.5rem !important;
     }
-    
-    #chartStats .col-md-3:last-child {
-        border-bottom: none;
-        margin-bottom: 0;
+
+    .form-select-sm {
+        font-size: 0.8rem;
+        padding: 0.2rem 0.5rem;
     }
-    
-    .chart-area {
-        height: 300px;
+
+    .summary-card .card-body {
+        padding: 1rem !important;
     }
 }
 
-/* Loading animation */
+@media (max-width: 576px) {
+    .h4 {
+        font-size: 1.1rem;
+    }
+
+    .chart-area {
+        height: 200px;
+    }
+
+    .chart-pie {
+        height: 180px;
+    }
+
+    #chartStats > div {
+        min-width: 100%;
+        text-align: center;
+        padding: 0.5rem 0;
+    }
+}
+
+/* Loading Animation */
 .spinner-border {
     animation: spinner-border .75s linear infinite;
 }
@@ -355,11 +333,27 @@
     }
 }
 
-/* Form select styling */
-.form-select-sm {
-    font-size: 0.875rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: 0.2rem;
+/* Spacing Improvements */
+.dashboard-section {
+    margin-bottom: 2rem;
+}
+
+/* Clean shadows */
+.shadow-sm {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.06) !important;
+}
+
+/* Improve readability */
+.text-muted {
+    color: #6c757d !important;
+}
+
+.fw-semibold {
+    font-weight: 600 !important;
+}
+
+.bg-light {
+    background-color: #f8f9fa !important;
 }
 </style>
 {% endblock %}
@@ -370,19 +364,18 @@
 // Enhanced Charts with dynamic data loading
 document.addEventListener('DOMContentLoaded', function() {
     let cashFlowChart;
-    
+
     // Initialize selectors
     const periodSelector = document.getElementById('periodSelector');
     const yearSelector = document.getElementById('yearSelector');
     const chartLoading = document.getElementById('chartLoading');
     const chartContainer = document.getElementById('chartContainer');
-    
+
     // Stats elements
     const statsIncome = document.getElementById('statsIncome');
     const statsExpenses = document.getElementById('statsExpenses');
     const statsNetFlow = document.getElementById('statsNetFlow');
-    const statsBalance = document.getElementById('statsBalance');
-    
+
     // Set current year as default
     const currentYear = new Date().getFullYear();
     if (yearSelector) {
@@ -393,7 +386,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         yearSelector.value = currentYear;
     }
-    
+
     // Function to format currency
     function formatCurrency(value) {
         return new Intl.NumberFormat('th-TH', {
@@ -401,37 +394,35 @@ document.addEventListener('DOMContentLoaded', function() {
             maximumFractionDigits: 2
         }).format(value) + ' ฿';
     }
-    
+
     // Function to update statistics
     function updateStats(summary) {
-        statsIncome.textContent = formatCurrency(summary.total_income);
-        statsExpenses.textContent = formatCurrency(summary.total_expenses);
-        
-        const netFlow = summary.net_flow;
-        statsNetFlow.textContent = formatCurrency(netFlow);
-        statsNetFlow.className = `h6 mb-0 ${netFlow >= 0 ? 'text-success' : 'text-danger'}`;
-        
-        const balance = summary.final_balance;
-        statsBalance.textContent = formatCurrency(balance);
-        statsBalance.className = `h6 mb-0 ${balance >= 0 ? 'text-success' : 'text-danger'}`;
+        if (statsIncome) statsIncome.textContent = formatCurrency(summary.total_income);
+        if (statsExpenses) statsExpenses.textContent = formatCurrency(summary.total_expenses);
+
+        if (statsNetFlow) {
+            const netFlow = summary.net_flow;
+            statsNetFlow.textContent = formatCurrency(netFlow);
+            statsNetFlow.className = `fw-bold small ${netFlow >= 0 ? 'text-success' : 'text-danger'}`;
+        }
     }
-    
+
     // Function to load chart data
     async function loadChartData(period = 'year', year = currentYear) {
         try {
             // Show loading
             chartLoading.style.display = 'block';
             chartContainer.style.opacity = '0.3';
-            
+
             const response = await fetch(`{% url 'get_cashflow_data' %}?period=${period}&year=${year}`);
             const data = await response.json();
-            
+
             // Update statistics
             updateStats(data.summary);
-            
+
             // Update chart
             updateChart(data);
-            
+
         } catch (error) {
             console.error('Error loading chart data:', error);
         } finally {
@@ -440,17 +431,17 @@ document.addEventListener('DOMContentLoaded', function() {
             chartContainer.style.opacity = '1';
         }
     }
-    
+
     // Function to update chart
     function updateChart(data) {
         const areaCtx = document.getElementById('myAreaChart');
         if (!areaCtx) return;
-        
+
         // Destroy existing chart
         if (cashFlowChart) {
             cashFlowChart.destroy();
         }
-        
+
         cashFlowChart = new Chart(areaCtx, {
             type: 'line',
             data: {
@@ -566,22 +557,22 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    
+
     // Event listeners for selectors
     if (periodSelector) {
         periodSelector.addEventListener('change', function() {
             const period = this.value;
             const year = yearSelector ? yearSelector.value : currentYear;
-            
+
             // Hide year selector for non-year periods
             if (yearSelector) {
                 yearSelector.style.display = period === 'year' ? 'block' : 'none';
             }
-            
+
             loadChartData(period, year);
         });
     }
-    
+
     if (yearSelector) {
         yearSelector.addEventListener('change', function() {
             const period = periodSelector ? periodSelector.value : 'year';
@@ -589,10 +580,10 @@ document.addEventListener('DOMContentLoaded', function() {
             loadChartData(period, year);
         });
     }
-    
+
     // Initial load
     loadChartData();
-    
+
     // Pie Chart - Expense Categories (unchanged)
     const pieCtx = document.getElementById('myPieChart');
     if (pieCtx) {
