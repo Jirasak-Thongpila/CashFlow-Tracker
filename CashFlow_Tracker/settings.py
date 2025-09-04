@@ -101,7 +101,7 @@ DATABASES = {
         'ENGINE': get_env_variable('DB_ENGINE', 'django.db.backends.postgresql'),
         'NAME': get_env_variable('DB_NAME', 'postgres'),
         'USER': get_env_variable('DB_USER', 'postgres.ifbbqowbocrqeoqmflgo'),
-        'PASSWORD': get_env_variable('DB_PASSWORD', ''),
+        'PASSWORD': get_env_variable('DB_PASSWORD', 'tT0613828245'),
         'HOST': get_env_variable('DB_HOST', 'aws-1-ap-southeast-1.pooler.supabase.com'),
         'PORT': get_env_variable('DB_PORT', '5432'),
         'OPTIONS': {
