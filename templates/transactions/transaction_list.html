@@ -1,17 +1,36 @@
 {% extends 'base.html' %}
 
-{% block title %}รายการธุรกรรม - CashFlow Tracker{% endblock %}
+{% block title %}💰รายการธุรกรรม - CashFlow Tracker{% endblock %}
 
 {% block extra_css %}
 <style>
+    /* Transaction Card Effects */
     .transaction-card {
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         border-left: 4px solid #dee2e6;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .transaction-card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0));
+        opacity: 0;
+        transition: opacity 0.3s ease;
     }
 
     .transaction-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        transform: translateY(-4px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+
+    .transaction-card:hover::after {
+        opacity: 1;
     }
 
     .transaction-card.income {
@@ -22,22 +41,71 @@
         border-left-color: #dc3545;
     }
 
+    /* Amount Styling */
     .amount-income {
         color: #28a745;
         font-weight: bold;
+        transition: all 0.3s ease;
     }
 
     .amount-expense {
         color: #dc3545;
         font-weight: bold;
+        transition: all 0.3s ease;
     }
 
+    .transaction-card:hover .amount-income {
+        transform: scale(1.05);
+        text-shadow: 0 0 10px rgba(40, 167, 69, 0.2);
+    }
+
+    .transaction-card:hover .amount-expense {
+        transform: scale(1.05);
+        text-shadow: 0 0 10px rgba(220, 53, 69, 0.2);
+    }
+
+    /* Stats Card Effects */
     .stats-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #2380dd 0%, #1a65b0 100%);
         color: white;
         border: none;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
     }
 
+    .stats-card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(35, 128, 221, 0.3);
+    }
+
+    .stats-card:hover::after {
+        opacity: 1;
+    }
+
+    .stats-card:hover i {
+        transform: scale(1.1) rotate(-5deg);
+        transition: transform 0.3s ease;
+    }
+
+    .stats-card:hover h4 {
+        transform: scale(1.05);
+        transition: transform 0.3s ease;
+    }
+
+    /* Category Badge Effects */
     .category-badge {
         display: inline-flex;
         align-items: center;
@@ -45,13 +113,72 @@
         border-radius: 0.5rem;
         font-size: 0.875rem;
         font-weight: 500;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
 
+    .transaction-card:hover .category-badge {
+        transform: scale(1.1) rotate(-5deg);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    /* Filter Section Effects */
     .filter-section {
         background: #f8f9fa;
-        border-radius: 10px;
-        padding: 20px;
+        border-radius: 15px;
+        padding: 25px;
         margin-bottom: 30px;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .filter-section:hover {
+        box-shadow: 0 8px 30px rgba(0,0,0,0.05);
+        border-color: rgba(35, 128, 221, 0.2);
+    }
+
+    /* Form Controls Hover Effects */
+    .form-control, .form-select {
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+        background: rgba(255, 255, 255, 0.9);
+    }
+
+    .form-control:hover, .form-select:hover {
+        border-color: rgba(35, 128, 221, 0.3);
+        box-shadow: 0 2px 8px rgba(35, 128, 221, 0.1);
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #2380dd;
+        box-shadow: 0 0 0 0.25rem rgba(35, 128, 221, 0.25);
+    }
+
+    /* Button Hover Effects */
+    .btn {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn:hover {
+        transform: translateY(-2px);
+    }
+
+    .btn-outline-primary:hover {
+        box-shadow: 0 4px 15px rgba(35, 128, 221, 0.3);
+    }
+
+    .btn-outline-danger:hover {
+        box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+    }
+
+    /* Pagination Hover Effects */
+    .page-link {
+        transition: all 0.3s ease;
+    }
+
+    .page-link:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 10px rgba(35, 128, 221, 0.2);
     }
 
     .date-range-fields {
@@ -66,16 +193,30 @@
 
 {% block content %}
 <div class="container">
-    <!-- Header -->
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <h1 class="h2"><i class="fas fa-exchange-alt me-2"></i>รายการธุรกรรม</h1>
-            <p class="text-muted">จัดการรายการรายรับและรายจ่ายของคุณ</p>
-        </div>
-        <div class="col-md-6 text-end">
-            <a href="{% url 'transaction_create' %}" class="btn btn-primary">
-                <i class="fas fa-plus me-2"></i>เพิ่มรายการใหม่
-            </a>
+    <!-- Header with Enhanced Design -->
+    <div class="page-header mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <div class="header-content">
+                    <div class="title-wrapper">
+                        <div class="title-icon">
+                            <i class="fas fa-exchange-alt"></i>
+                        </div>
+                        <div class="title-text">
+                            <h1 class="h2 gradient-text mb-2">รายการธุรกรรม</h1>
+                            <p class="subtitle">จัดการรายการรายรับและรายจ่ายของคุณ</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 text-end">
+                <a href="{% url 'transaction_create' %}" class="btn btn-primary btn-add-new">
+                    <span class="btn-content">
+                        <i class="fas fa-plus"></i>
+                        <span>เพิ่มรายการใหม่</span>
+                    </span>
+                </a>
+            </div>
         </div>
     </div>
 
