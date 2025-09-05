@@ -313,3 +313,46 @@ $RECYCLE.BIN/
 
 # Custom rules (everything added below won't be overriden by 'Generate .gitignore File' if you use 'Update' option)
 
+# SSL certificates for development
+ssl/
+*.pem
+*.crt
+*.key
+
+# Static files directory
+statics/
+staticfiles/
+
+# User uploads
+uploads/
+
+# Test files
+test_*.html
+test_*.py
+
+# IDE specific
+.idea/
+*.swp
+*.swo
+
+# Database backups
+*.sql
+*.dump
+
+# Environment specific
+.env.local
+.env.production
+.env.staging
+
+# Logs
+logs/
+*.log.*
+
+# Cache directories
+.cache/
+cache/
+
+# Temporary files
+temp/
+tmp/
+

@@ -22,6 +22,7 @@
         background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0));
         opacity: 0;
         transition: opacity 0.3s ease;
+        pointer-events: none;
     }
 
     .transaction-card:hover {
@@ -84,6 +85,7 @@
         background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0));
         opacity: 0;
         transition: opacity 0.3s ease;
+        pointer-events: none;
     }
 
     .stats-card:hover {
@@ -336,10 +338,10 @@
                                 </div>
                                 <div class="col-md-2 text-end">
                                     <div class="btn-group" role="group">
-                                        <a href="{% url 'transaction_edit' transaction.pk %}" class="btn btn-outline-primary btn-sm">
+                                        <a href="{% url 'transaction_edit' transaction.pk %}" class="btn btn-outline-primary btn-sm" title="แก้ไขรายการ">
                                             <i class="fas fa-edit"></i>
                                         </a>
-                                        <a href="{% url 'transaction_delete' transaction.pk %}" class="btn btn-outline-danger btn-sm">
+                                        <a href="{% url 'transaction_delete' transaction.pk %}" class="btn btn-outline-danger btn-sm" title="ลบรายการ" onclick="return confirm('คุณแน่ใจหรือไม่ที่จะลบรายการนี้?')">
                                             <i class="fas fa-trash"></i>
                                         </a>
                                     </div>
